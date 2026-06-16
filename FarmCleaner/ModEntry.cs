@@ -1,0 +1,108 @@
+using StardewModdingAPI;
+using StardewModdingAPI.Events;
+using StardewValley;
+
+namespace CylixLee.StardewValley.FarmCleaner;
+
+internal sealed class ModEntry : Mod
+{
+    private ModConfig config = null!;
+    private FarmClearer farmClearer = null!;
+
+    public override void Entry(IModHelper helper)
+    {
+        config = Helper.ReadConfig<ModConfig>();
+        farmClearer = new FarmClearer(Helper, Monitor);
+
+        FarmCleanerPatches.Apply(ModManifest.UniqueID, Monitor);
+
+        helper.Events.Input.ButtonsChanged += OnButtonsChanged;
+        helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+
+        helper.ConsoleCommands.Add("clearfarm",
+            "Clears all trees, stones, grass, and debris from your farm.\n\nUsage: clearfarm",
+            (_, _) => farmClearer.ClearFarm(config.ClearFruitTrees, config.DropMultiplier, config.EnableExperience, config.ClearTappedTrees, config.ClearGrowingTrees));
+    }
+
+    private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
+    {
+        if (!Context.IsWorldReady)
+            return;
+
+        if (!config.ClearKey.JustPressed())
+            return;
+
+        if (Game1.currentLocation is not Farm)
+        {
+            Monitor.Log("You must be on your farm to use this.", LogLevel.Info);
+            return;
+        }
+
+        farmClearer.ClearFarm(config.ClearFruitTrees, config.DropMultiplier, config.EnableExperience, config.ClearTappedTrees, config.ClearGrowingTrees);
+    }
+
+    private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
+    {
+        var gmcm = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>(
+            "spacechase0.GenericModConfigMenu");
+        if (gmcm is null)
+            return;
+
+        gmcm.Register(
+            mod: ModManifest,
+            reset: () => config = new ModConfig(),
+            save: () => Helper.WriteConfig(config)
+        );
+
+        gmcm.AddKeybindList(
+            mod: ModManifest,
+            getValue: () => config.ClearKey,
+            setValue: val => config.ClearKey = val,
+            name: () => "Clear Key",
+            tooltip: () => "Key to clear all trees, stones, grass, and debris from your farm."
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.ClearFruitTrees,
+            setValue: val => config.ClearFruitTrees = val,
+            name: () => "Clear Fruit Trees",
+            tooltip: () => "If enabled, fruit trees will also be cleared."
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.EnableExperience,
+            setValue: val => config.EnableExperience = val,
+            name: () => "Enable Experience",
+            tooltip: () => "If disabled, no experience is gained from clearing the farm."
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.ClearTappedTrees,
+            setValue: val => config.ClearTappedTrees = val,
+            name: () => "Clear Tapped Trees",
+            tooltip: () => "If enabled, trees with tappers will also be cleared."
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.ClearGrowingTrees,
+            setValue: val => config.ClearGrowingTrees = val,
+            name: () => "Clear Growing Trees",
+            tooltip: () => "If enabled, trees that are not fully grown will also be cleared."
+        );
+
+        gmcm.AddNumberOption(
+            mod: ModManifest,
+            getValue: () => config.DropMultiplier,
+            setValue: val => config.DropMultiplier = val,
+            name: () => "Drop Multiplier",
+            tooltip: () => "Multiplies the number of dropped items (wood, stone, fiber, etc).",
+            min: 0.5f,
+            max: 10f,
+            interval: 0.5f
+        );
+    }
+}
