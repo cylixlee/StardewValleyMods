@@ -12,27 +12,17 @@ This mod provides the following settings.
 
 ![settings](./img/settings.png)
 
-### Clear Key
+### Hot Key
 
 The key to clear all trees, stones, grass, and debris from your farm. Defaults to `K`.
+
+### Gain Experience
+
+Whether to gain experience from clearing the farm. Defaults to enabled. When disabled, no experience is granted.
 
 ### Clear Fruit Trees
 
 Whether to clear fruit trees. Defaults to disabled — fruit trees will not be cleared.
-
-### Drop Multiplier
-
-A multiplier applied to the number of dropped items (wood, stone, fiber, etc). Defaults to $1$. Range: $0.5$ – $10.0$.
-
-This is extremely useful when you don't want to collect the basic resources repeatedly, and it's not that balance-breaking in my opinion.
-
-When your backpack is full, the artifacts will drop by.
-
-![overflow](./img/overflow.jpg)
-
-### Enable Experience
-
-Whether to gain experience from clearing the farm. Defaults to enabled. When disabled, no experience is granted.
 
 ### Clear Tapped Trees
 
@@ -41,3 +31,21 @@ Whether to clear trees that have a tapper attached. Defaults to disabled — tap
 ### Clear Growing Trees
 
 Whether to clear trees that are not yet fully grown. Defaults to disabled — saplings and young trees will not be cleared.
+
+### Clear Player-Planted Trees
+
+Whether to clear trees that were planted by the player using seeds. Defaults to enabled — player-planted trees will be cleared.
+
+### Clear Giant Crops
+
+Whether to clear giant crops and meteorites. Defaults to disabled — giant crops and meteorites will not be cleared.
+
+### Drop Multiplier
+
+A multiplier applied to the number of dropped items (wood, stone, fiber, etc). Defaults to 1.0. Range: 0.1 – 10.0.
+
+This is extremely useful when you don't want to collect the basic resources repeatedly, and it's not that balance-breaking in my opinion.
+
+When your backpack is full, the extra items will be dropped near you after all debris is collected.
+
+![overflow](./img/overflow.jpg)
