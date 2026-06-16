@@ -1,10 +1,10 @@
 {
-  "ClearKey": "K",
+  "HotKey": "K",
+  "GainExperience": true,
   "ClearFruitTrees": false,
-  "DropMultiplier": 1.0,
-  "EnableExperience": true,
   "ClearTappedTrees": false,
   "ClearGrowingTrees": false,
   "ClearPlantedTrees": true,
-  "ClearGiantCrops": false
+  "ClearGiantCrops": false,
+  "DropMultiplier": 1.0
 }

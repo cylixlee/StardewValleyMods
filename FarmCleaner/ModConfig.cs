@@ -5,14 +5,14 @@ namespace CylixLee.StardewValley.FarmCleaner;
 
 public sealed class ModConfig
 {
-    public KeybindList ClearKey { get; set; } = KeybindList.Parse("K");
+    public KeybindList HotKey { get; set; } = KeybindList.Parse("K");
+    public bool GainExperience { get; set; } = true;
     public bool ClearFruitTrees { get; set; }
-    public float DropMultiplier { get; set; } = 1.0f;
-    public bool EnableExperience { get; set; } = true;
     public bool ClearTappedTrees { get; set; }
     public bool ClearGrowingTrees { get; set; }
     public bool ClearPlantedTrees { get; set; } = true;
     public bool ClearGiantCrops { get; set; }
+    public float DropMultiplier { get; set; } = 1.0f;
 
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context)

@@ -31,7 +31,7 @@ internal sealed class ModEntry : Mod
         if (!Context.IsWorldReady || !Context.IsPlayerFree)
             return;
 
-        if (!config.ClearKey.JustPressed())
+        if (!config.HotKey.JustPressed())
             return;
 
         if (Game1.currentLocation is not Farm)
@@ -46,13 +46,13 @@ internal sealed class ModEntry : Mod
     private void DoClear()
     {
         farmClearer.ClearFarm(
+            config.GainExperience,
             config.ClearFruitTrees,
-            config.DropMultiplier,
-            config.EnableExperience,
             config.ClearTappedTrees,
             config.ClearGrowingTrees,
             config.ClearPlantedTrees,
-            config.ClearGiantCrops);
+            config.ClearGiantCrops,
+            config.DropMultiplier);
     }
 
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -70,10 +70,18 @@ internal sealed class ModEntry : Mod
 
         gmcm.AddKeybindList(
             mod: ModManifest,
-            getValue: () => config.ClearKey,
-            setValue: val => config.ClearKey = val,
-            name: () => I18n.Config_ClearKey_Name,
-            tooltip: () => I18n.Config_ClearKey_Tooltip
+            getValue: () => config.HotKey,
+            setValue: val => config.HotKey = val,
+            name: () => I18n.Config_HotKey_Name,
+            tooltip: () => I18n.Config_HotKey_Tooltip
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.GainExperience,
+            setValue: val => config.GainExperience = val,
+            name: () => I18n.Config_GainExperience_Name,
+            tooltip: () => I18n.Config_GainExperience_Tooltip
         );
 
         gmcm.AddBoolOption(
@@ -82,14 +90,6 @@ internal sealed class ModEntry : Mod
             setValue: val => config.ClearFruitTrees = val,
             name: () => I18n.Config_ClearFruitTrees_Name,
             tooltip: () => I18n.Config_ClearFruitTrees_Tooltip
-        );
-
-        gmcm.AddBoolOption(
-            mod: ModManifest,
-            getValue: () => config.EnableExperience,
-            setValue: val => config.EnableExperience = val,
-            name: () => I18n.Config_EnableExperience_Name,
-            tooltip: () => I18n.Config_EnableExperience_Tooltip
         );
 
         gmcm.AddBoolOption(

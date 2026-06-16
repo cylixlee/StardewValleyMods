@@ -25,13 +25,13 @@ internal class FarmClearer
     }
 
     public void ClearFarm(
+        bool gainExperience,
         bool clearFruitTrees,
-        float dropMultiplier,
-        bool enableExperience,
         bool clearTappedTrees,
         bool clearGrowingTrees,
         bool clearPlantedTrees,
-        bool clearGiantCrops)
+        bool clearGiantCrops,
+        float dropMultiplier)
     {
         if (magnetActive)
             return;
@@ -42,7 +42,7 @@ internal class FarmClearer
 
         var existingDebris = new HashSet<Debris>(farm.debris);
 
-        FarmCleanerPatches.blockExperience = !enableExperience;
+        FarmCleanerPatches.blockExperience = !gainExperience;
         try
         {
             var total = ClearObjects(farm)

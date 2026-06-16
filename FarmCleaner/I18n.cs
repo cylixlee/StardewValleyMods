@@ -15,12 +15,12 @@ internal static class I18n
     public static string NothingToClear => Get("nothing-to-clear");
     public static string ClearedItems(object count) => Get("cleared-items", new { count });
 
-    public static string Config_ClearKey_Name => Get("config.clear-key.name");
-    public static string Config_ClearKey_Tooltip => Get("config.clear-key.tooltip");
+    public static string Config_HotKey_Name => Get("config.hot-key.name");
+    public static string Config_HotKey_Tooltip => Get("config.hot-key.tooltip");
+    public static string Config_GainExperience_Name => Get("config.gain-experience.name");
+    public static string Config_GainExperience_Tooltip => Get("config.gain-experience.tooltip");
     public static string Config_ClearFruitTrees_Name => Get("config.clear-fruit-trees.name");
     public static string Config_ClearFruitTrees_Tooltip => Get("config.clear-fruit-trees.tooltip");
-    public static string Config_EnableExperience_Name => Get("config.enable-experience.name");
-    public static string Config_EnableExperience_Tooltip => Get("config.enable-experience.tooltip");
     public static string Config_ClearTappedTrees_Name => Get("config.clear-tapped-trees.name");
     public static string Config_ClearTappedTrees_Tooltip => Get("config.clear-tapped-trees.tooltip");
     public static string Config_ClearGrowingTrees_Name => Get("config.clear-growing-trees.name");
