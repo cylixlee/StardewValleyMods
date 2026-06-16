@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "design-pattern": {
+      "source": "cylixlee/skills",
+      "sourceType": "github",
+      "skillPath": "design-pattern/SKILL.md",
+      "computedHash": "c1e127daed06524c88d06b9b5f75f300558d4e3a44feb69e1910891cf35d721d"
+    },
+    "stardew-valley-smapi": {
+      "source": "cylixlee/skills",
+      "sourceType": "github",
+      "skillPath": "stardew-valley-smapi/SKILL.md",
+      "computedHash": "2a679708664e2ade6aa9b181bb4e01798f996bbb4e9f78a929d829ef90e99f0a"
+    }
+  }
+}
