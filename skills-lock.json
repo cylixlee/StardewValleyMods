@@ -7,6 +7,12 @@
       "skillPath": "design-pattern/SKILL.md",
       "computedHash": "c1e127daed06524c88d06b9b5f75f300558d4e3a44feb69e1910891cf35d721d"
     },
+    "smapi-best-practices": {
+      "source": "cylixlee/skills",
+      "sourceType": "github",
+      "skillPath": "smapi-best-practices/SKILL.md",
+      "computedHash": "292259b0abc981e6fbbcaa002410dfcd5512741a6461015d066de9e9e25d61d1"
+    },
     "stardew-valley-smapi": {
       "source": "cylixlee/skills",
       "sourceType": "github",
