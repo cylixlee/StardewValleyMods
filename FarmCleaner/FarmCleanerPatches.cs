@@ -1,3 +1,4 @@
+using System.Reflection;
 using HarmonyLib;
 using System.Runtime.CompilerServices;
 using StardewModdingAPI;
@@ -17,22 +18,22 @@ public static class FarmCleanerPatches
     {
         var harmony = new Harmony(uniqueId);
 
-        harmony.Patch(
+        PatchIf(harmony,
             original: AccessTools.Method(typeof(Farmer), "GetAppliedMagneticRadius"),
-            prefix: new HarmonyMethod(typeof(FarmCleanerPatches), nameof(MagneticRadiusPrefix))
-        );
+            prefix: new HarmonyMethod(typeof(FarmCleanerPatches), nameof(MagneticRadiusPrefix)),
+            monitor: monitor);
 
-        harmony.Patch(
+        PatchIf(harmony,
             original: AccessTools.Method(typeof(Farmer), "addItemToInventory",
                 [typeof(Item)]),
-            postfix: new HarmonyMethod(typeof(FarmCleanerPatches), nameof(AddItemToInventoryPostfix))
-        );
+            postfix: new HarmonyMethod(typeof(FarmCleanerPatches), nameof(AddItemToInventoryPostfix)),
+            monitor: monitor);
 
-        harmony.Patch(
+        PatchIf(harmony,
             original: AccessTools.Method(typeof(Farmer), "gainExperience",
                 [typeof(int), typeof(int)]),
-            prefix: new HarmonyMethod(typeof(FarmCleanerPatches), nameof(GainExperiencePrefix))
-        );
+            prefix: new HarmonyMethod(typeof(FarmCleanerPatches), nameof(GainExperiencePrefix)),
+            monitor: monitor);
 
         var couldAcceptMethod =
             AccessTools.Method(typeof(Farmer), "couldInventoryAcceptThisItem",
@@ -44,10 +45,35 @@ public static class FarmCleanerPatches
             ? new HarmonyMethod(typeof(FarmCleanerPatches), nameof(CouldInventoryAcceptPrefix))
             : new HarmonyMethod(typeof(FarmCleanerPatches), nameof(CouldInventoryAcceptPrefixAndroid));
 
-        harmony.Patch(
+        PatchIf(harmony,
             original: couldAcceptMethod,
-            prefix: couldAcceptPrefix
-        );
+            prefix: couldAcceptPrefix,
+            monitor: monitor);
+
+        PatchIf(harmony,
+            original: AccessTools.Method(typeof(Farmer), "couldInventoryAcceptThisItem",
+                [typeof(string), typeof(int), typeof(int)]),
+            prefix: new HarmonyMethod(typeof(FarmCleanerPatches), nameof(CouldInventoryAcceptPrefixMinimal)),
+            monitor: monitor);
+    }
+
+    private static void PatchIf(Harmony harmony, MethodInfo? original, HarmonyMethod? prefix = null, HarmonyMethod? postfix = null, IMonitor? monitor = null)
+    {
+        if (original is null)
+        {
+            monitor?.Log("Failed to apply patch: target method not found. Use ilspycmd to verify method name and parameter types.", LogLevel.Error);
+            return;
+        }
+
+        try
+        {
+            harmony.Patch(original, prefix, postfix);
+            monitor?.Log($"Patched {original.DeclaringType?.Name}.{original.Name}({string.Join(", ", original.GetParameters().Select(p => $"{p.ParameterType.Name} {p.Name}"))})", LogLevel.Trace);
+        }
+        catch (Exception ex)
+        {
+            monitor?.Log($"Failed to apply patch to {original.DeclaringType?.Name}.{original.Name}: {ex.Message}", LogLevel.Error);
+        }
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -96,6 +122,17 @@ public static class FarmCleanerPatches
     {
         if (blockExperience)
             return false;
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static bool CouldInventoryAcceptPrefixMinimal(Farmer __instance, ref bool __result)
+    {
+        if (magnetBoostActive)
+        {
+            __result = true;
+            return false;
+        }
         return true;
     }
 }

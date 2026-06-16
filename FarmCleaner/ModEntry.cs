@@ -11,6 +11,8 @@ internal sealed class ModEntry : Mod
 
     public override void Entry(IModHelper helper)
     {
+        I18n.Init(helper.Translation);
+
         config = Helper.ReadConfig<ModConfig>();
         farmClearer = new FarmClearer(Helper, Monitor);
 
@@ -20,13 +22,13 @@ internal sealed class ModEntry : Mod
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
 
         helper.ConsoleCommands.Add("clearfarm",
-            "Clears all trees, stones, grass, and debris from your farm.\n\nUsage: clearfarm",
-            (_, _) => farmClearer.ClearFarm(config.ClearFruitTrees, config.DropMultiplier, config.EnableExperience, config.ClearTappedTrees, config.ClearGrowingTrees));
+            I18n.CommandClearfarmSummary,
+            (_, _) => DoClear());
     }
 
     private void OnButtonsChanged(object? sender, ButtonsChangedEventArgs e)
     {
-        if (!Context.IsWorldReady)
+        if (!Context.IsWorldReady || !Context.IsPlayerFree)
             return;
 
         if (!config.ClearKey.JustPressed())
@@ -34,11 +36,23 @@ internal sealed class ModEntry : Mod
 
         if (Game1.currentLocation is not Farm)
         {
-            Monitor.Log("You must be on your farm to use this.", LogLevel.Info);
+            Monitor.Log(I18n.NotOnFarm, LogLevel.Info);
             return;
         }
 
-        farmClearer.ClearFarm(config.ClearFruitTrees, config.DropMultiplier, config.EnableExperience, config.ClearTappedTrees, config.ClearGrowingTrees);
+        DoClear();
+    }
+
+    private void DoClear()
+    {
+        farmClearer.ClearFarm(
+            config.ClearFruitTrees,
+            config.DropMultiplier,
+            config.EnableExperience,
+            config.ClearTappedTrees,
+            config.ClearGrowingTrees,
+            config.ClearPlantedTrees,
+            config.ClearGiantCrops);
     }
 
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -58,51 +72,67 @@ internal sealed class ModEntry : Mod
             mod: ModManifest,
             getValue: () => config.ClearKey,
             setValue: val => config.ClearKey = val,
-            name: () => "Clear Key",
-            tooltip: () => "Key to clear all trees, stones, grass, and debris from your farm."
+            name: () => I18n.Config_ClearKey_Name,
+            tooltip: () => I18n.Config_ClearKey_Tooltip
         );
 
         gmcm.AddBoolOption(
             mod: ModManifest,
             getValue: () => config.ClearFruitTrees,
             setValue: val => config.ClearFruitTrees = val,
-            name: () => "Clear Fruit Trees",
-            tooltip: () => "If enabled, fruit trees will also be cleared."
+            name: () => I18n.Config_ClearFruitTrees_Name,
+            tooltip: () => I18n.Config_ClearFruitTrees_Tooltip
         );
 
         gmcm.AddBoolOption(
             mod: ModManifest,
             getValue: () => config.EnableExperience,
             setValue: val => config.EnableExperience = val,
-            name: () => "Enable Experience",
-            tooltip: () => "If disabled, no experience is gained from clearing the farm."
+            name: () => I18n.Config_EnableExperience_Name,
+            tooltip: () => I18n.Config_EnableExperience_Tooltip
         );
 
         gmcm.AddBoolOption(
             mod: ModManifest,
             getValue: () => config.ClearTappedTrees,
             setValue: val => config.ClearTappedTrees = val,
-            name: () => "Clear Tapped Trees",
-            tooltip: () => "If enabled, trees with tappers will also be cleared."
+            name: () => I18n.Config_ClearTappedTrees_Name,
+            tooltip: () => I18n.Config_ClearTappedTrees_Tooltip
         );
 
         gmcm.AddBoolOption(
             mod: ModManifest,
             getValue: () => config.ClearGrowingTrees,
             setValue: val => config.ClearGrowingTrees = val,
-            name: () => "Clear Growing Trees",
-            tooltip: () => "If enabled, trees that are not fully grown will also be cleared."
+            name: () => I18n.Config_ClearGrowingTrees_Name,
+            tooltip: () => I18n.Config_ClearGrowingTrees_Tooltip
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.ClearPlantedTrees,
+            setValue: val => config.ClearPlantedTrees = val,
+            name: () => I18n.Config_ClearPlantedTrees_Name,
+            tooltip: () => I18n.Config_ClearPlantedTrees_Tooltip
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.ClearGiantCrops,
+            setValue: val => config.ClearGiantCrops = val,
+            name: () => I18n.Config_ClearGiantCrops_Name,
+            tooltip: () => I18n.Config_ClearGiantCrops_Tooltip
         );
 
         gmcm.AddNumberOption(
             mod: ModManifest,
             getValue: () => config.DropMultiplier,
             setValue: val => config.DropMultiplier = val,
-            name: () => "Drop Multiplier",
-            tooltip: () => "Multiplies the number of dropped items (wood, stone, fiber, etc).",
-            min: 0.5f,
+            name: () => I18n.Config_DropMultiplier_Name,
+            tooltip: () => I18n.Config_DropMultiplier_Tooltip,
+            min: 0.1f,
             max: 10f,
-            interval: 0.5f
+            interval: 0.1f
         );
     }
 }

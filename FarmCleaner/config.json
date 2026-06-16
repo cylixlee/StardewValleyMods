@@ -1,0 +1,10 @@
+{
+  "ClearKey": "K",
+  "ClearFruitTrees": false,
+  "DropMultiplier": 1.0,
+  "EnableExperience": true,
+  "ClearTappedTrees": false,
+  "ClearGrowingTrees": false,
+  "ClearPlantedTrees": true,
+  "ClearGiantCrops": false
+}
