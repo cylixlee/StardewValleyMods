@@ -327,6 +327,7 @@ internal class FarmClearer
         var count = 0;
 
         var clumps = farm.resourceClumps.ToList();
+        var toRemove = new List<ResourceClump>();
 
         foreach (var clump in clumps)
         {
@@ -346,10 +347,12 @@ internal class FarmClearer
 
             clump.health.Value = 1;
             clump.performToolAction(tool, damage: 1, tile);
+            toRemove.Add(clump);
             count++;
         }
 
-        farm.resourceClumps.Clear();
+        foreach (var clump in toRemove)
+            farm.resourceClumps.Remove(clump);
 
         return count;
     }
