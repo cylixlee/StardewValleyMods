@@ -2,7 +2,7 @@
   "Name": "Farm Cleaner",
   "Author": "cylixlee",
   "Version": "%ProjectVersion%",
-  "Description": "Press a key to instantly clear all trees, stones, and grass from your farm. Items are magnetically attracted to you.",
+  "Description": "Press a key to instantly clear selected trees, stones, grass, and debris from your farm. Items are magnetically attracted to you.",
   "UniqueID": "CylixLee.StardewValley.FarmCleaner",
   "EntryDll": "FarmCleaner.dll",
   "MinimumApiVersion": "4.0.0",

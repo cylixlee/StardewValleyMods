@@ -14,11 +14,15 @@ This mod provides the following settings.
 
 ### Hot Key
 
-The key to clear all trees, stones, grass, and debris from your farm. Defaults to `K`.
+The key to clear selected trees, stones, grass, and debris from your farm. Defaults to `K`.
 
 ### Gain Experience
 
 Whether to gain experience from clearing the farm. Defaults to enabled. When disabled, no experience is granted.
+
+### Clear Grass
+
+Whether to clear grass. Defaults to disabled — grass will not be cleared.
 
 ### Clear Fruit Trees
 
@@ -31,10 +35,6 @@ Whether to clear trees that have a tapper attached. Defaults to disabled — tap
 ### Clear Growing Trees
 
 Whether to clear trees that are not yet fully grown. Defaults to disabled — saplings and young trees will not be cleared.
-
-### Clear Player-Planted Trees
-
-Whether to clear trees that were planted by the player using seeds. Defaults to enabled — player-planted trees will be cleared.
 
 ### Clear Giant Crops
 

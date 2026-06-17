@@ -19,14 +19,14 @@ internal static class I18n
     public static string Config_HotKey_Tooltip => Get("config.hot-key.tooltip");
     public static string Config_GainExperience_Name => Get("config.gain-experience.name");
     public static string Config_GainExperience_Tooltip => Get("config.gain-experience.tooltip");
+    public static string Config_ClearGrass_Name => Get("config.clear-grass.name");
+    public static string Config_ClearGrass_Tooltip => Get("config.clear-grass.tooltip");
     public static string Config_ClearFruitTrees_Name => Get("config.clear-fruit-trees.name");
     public static string Config_ClearFruitTrees_Tooltip => Get("config.clear-fruit-trees.tooltip");
     public static string Config_ClearTappedTrees_Name => Get("config.clear-tapped-trees.name");
     public static string Config_ClearTappedTrees_Tooltip => Get("config.clear-tapped-trees.tooltip");
     public static string Config_ClearGrowingTrees_Name => Get("config.clear-growing-trees.name");
     public static string Config_ClearGrowingTrees_Tooltip => Get("config.clear-growing-trees.tooltip");
-    public static string Config_ClearPlantedTrees_Name => Get("config.clear-planted-trees.name");
-    public static string Config_ClearPlantedTrees_Tooltip => Get("config.clear-planted-trees.tooltip");
     public static string Config_ClearGiantCrops_Name => Get("config.clear-giant-crops.name");
     public static string Config_ClearGiantCrops_Tooltip => Get("config.clear-giant-crops.tooltip");
     public static string Config_DropMultiplier_Name => Get("config.drop-multiplier.name");

@@ -4,22 +4,22 @@
   "cleared-items": "已清理 {{count}} 个物品。",
 
   "config.hot-key.name": "快捷键",
-  "config.hot-key.tooltip": "按下此键清除农场上的全部树木、石头、杂草和杂物。",
+  "config.hot-key.tooltip": "按下此键清除农场上选定类型的树木、石头、杂草和杂物。",
   "config.gain-experience.name": "获得经验",
   "config.gain-experience.tooltip": "禁用后，清除农场将不会获得经验。",
+  "config.clear-grass.name": "清除草地",
+  "config.clear-grass.tooltip": "启用后，草地也会被清除。",
   "config.clear-fruit-trees.name": "清除果树",
   "config.clear-fruit-trees.tooltip": "启用后，果树也会被清除。",
   "config.clear-tapped-trees.name": "清除已放树液采集器的树",
   "config.clear-tapped-trees.tooltip": "启用后，放置了树液采集器的树也会被清除。",
   "config.clear-growing-trees.name": "清除未长成的树",
   "config.clear-growing-trees.tooltip": "启用后，未完全长成的树也会被清除。",
-  "config.clear-planted-trees.name": "清除玩家种植的树",
-  "config.clear-planted-trees.tooltip": "禁用后，玩家使用种子种下的树不会被清除。",
   "config.clear-giant-crops.name": "清除巨大作物",
   "config.clear-giant-crops.tooltip": "启用后，巨大作物和陨石也会被清除。",
   "config.drop-multiplier.name": "掉落倍率",
   "config.drop-multiplier.tooltip": "掉落物品（木材、石头、纤维等）数量的倍率。",
 
-  "command.clearfarm.summary": "清除农场上的全部树木、石头、杂草和杂物。",
+  "command.clearfarm.summary": "清除农场上选定类型的树木、石头、杂草和杂物。",
   "command.clearfarm.usage": "用法: clearfarm"
 }

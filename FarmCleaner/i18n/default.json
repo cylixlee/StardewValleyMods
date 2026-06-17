@@ -4,22 +4,22 @@
   "cleared-items": "Cleared {{count}} items from the farm.",
 
   "config.hot-key.name": "Hot Key",
-  "config.hot-key.tooltip": "Key to clear all trees, stones, grass, and debris from your farm.",
+  "config.hot-key.tooltip": "Key to clear selected trees, stones, grass, and debris from your farm.",
   "config.gain-experience.name": "Gain Experience",
   "config.gain-experience.tooltip": "If disabled, no experience is gained from clearing the farm.",
+  "config.clear-grass.name": "Clear Grass",
+  "config.clear-grass.tooltip": "If enabled, grass will also be cleared.",
   "config.clear-fruit-trees.name": "Clear Fruit Trees",
   "config.clear-fruit-trees.tooltip": "If enabled, fruit trees will also be cleared.",
   "config.clear-tapped-trees.name": "Clear Tapped Trees",
   "config.clear-tapped-trees.tooltip": "If enabled, trees with tappers will also be cleared.",
   "config.clear-growing-trees.name": "Clear Growing Trees",
   "config.clear-growing-trees.tooltip": "If enabled, trees that are not fully grown will also be cleared.",
-  "config.clear-planted-trees.name": "Clear Player-Planted Trees",
-  "config.clear-planted-trees.tooltip": "If disabled, player-planted trees (from seeds) will not be cleared.",
   "config.clear-giant-crops.name": "Clear Giant Crops",
   "config.clear-giant-crops.tooltip": "If enabled, giant crops and meteorites will also be cleared.",
   "config.drop-multiplier.name": "Drop Multiplier",
   "config.drop-multiplier.tooltip": "Multiplies the number of dropped items (wood, stone, fiber, etc).",
 
-  "command.clearfarm.summary": "Clears all trees, stones, grass, and debris from your farm.",
+  "command.clearfarm.summary": "Clears selected trees, stones, grass, and debris from your farm.",
   "command.clearfarm.usage": "Usage: clearfarm"
 }

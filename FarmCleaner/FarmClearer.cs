@@ -26,10 +26,10 @@ internal class FarmClearer
 
     public void ClearFarm(
         bool gainExperience,
+        bool clearGrass,
         bool clearFruitTrees,
         bool clearTappedTrees,
         bool clearGrowingTrees,
-        bool clearPlantedTrees,
         bool clearGiantCrops,
         float dropMultiplier)
     {
@@ -46,7 +46,7 @@ internal class FarmClearer
         try
         {
             var total = ClearObjects(farm)
-                      + ClearTerrainFeatures(farm, clearFruitTrees, clearTappedTrees, clearGrowingTrees, clearPlantedTrees)
+                      + ClearTerrainFeatures(farm, clearGrass, clearFruitTrees, clearTappedTrees, clearGrowingTrees)
                       + ClearResourceClumps(farm, clearGiantCrops);
 
             if (total == 0)
@@ -245,10 +245,10 @@ internal class FarmClearer
 
     private int ClearTerrainFeatures(
         Farm farm,
+        bool clearGrass,
         bool clearFruitTrees,
         bool clearTappedTrees,
-        bool clearGrowingTrees,
-        bool clearPlantedTrees)
+        bool clearGrowingTrees)
     {
         var axe = new Axe
         {
@@ -271,8 +271,6 @@ internal class FarmClearer
                     if (!clearTappedTrees && HasTapper(farm, tile))
                         break;
                     if (!clearGrowingTrees && tree.growthStage.Value < 5)
-                        break;
-                    if (!clearPlantedTrees && IsPlantedTree(tree))
                         break;
                     if (tree.stump.Value)
                     {
@@ -297,7 +295,7 @@ internal class FarmClearer
                     toRemove.Add(tile);
                     break;
 
-                case Grass grass:
+                case Grass grass when clearGrass:
                     int weeds = grass.numberOfWeeds.Value;
                     for (int i = 0; i < weeds; i++)
                         grass.performToolAction(scythe, explosion: 0, tile);
@@ -391,17 +389,5 @@ internal class FarmClearer
         if (!farm.Objects.TryGetValue(tile, out var obj) || obj is null)
             return false;
         return obj.QualifiedItemId is "(BC)105" or "(BC)264";
-    }
-
-    private bool IsPlantedTree(Tree tree)
-    {
-        try
-        {
-            return modHelper.Reflection.GetField<bool>(tree, "planted").GetValue();
-        }
-        catch
-        {
-            return false;
-        }
     }
 }

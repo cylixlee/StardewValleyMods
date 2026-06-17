@@ -47,10 +47,10 @@ internal sealed class ModEntry : Mod
     {
         farmClearer.ClearFarm(
             config.GainExperience,
+            config.ClearGrass,
             config.ClearFruitTrees,
             config.ClearTappedTrees,
             config.ClearGrowingTrees,
-            config.ClearPlantedTrees,
             config.ClearGiantCrops,
             config.DropMultiplier);
     }
@@ -86,6 +86,14 @@ internal sealed class ModEntry : Mod
 
         gmcm.AddBoolOption(
             mod: ModManifest,
+            getValue: () => config.ClearGrass,
+            setValue: val => config.ClearGrass = val,
+            name: () => I18n.Config_ClearGrass_Name,
+            tooltip: () => I18n.Config_ClearGrass_Tooltip
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
             getValue: () => config.ClearFruitTrees,
             setValue: val => config.ClearFruitTrees = val,
             name: () => I18n.Config_ClearFruitTrees_Name,
@@ -106,14 +114,6 @@ internal sealed class ModEntry : Mod
             setValue: val => config.ClearGrowingTrees = val,
             name: () => I18n.Config_ClearGrowingTrees_Name,
             tooltip: () => I18n.Config_ClearGrowingTrees_Tooltip
-        );
-
-        gmcm.AddBoolOption(
-            mod: ModManifest,
-            getValue: () => config.ClearPlantedTrees,
-            setValue: val => config.ClearPlantedTrees = val,
-            name: () => I18n.Config_ClearPlantedTrees_Name,
-            tooltip: () => I18n.Config_ClearPlantedTrees_Tooltip
         );
 
         gmcm.AddBoolOption(
