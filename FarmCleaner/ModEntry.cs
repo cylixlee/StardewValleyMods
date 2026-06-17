@@ -34,18 +34,23 @@ internal sealed class ModEntry : Mod
         if (!config.HotKey.JustPressed())
             return;
 
-        if (Game1.currentLocation is not Farm)
-        {
-            Monitor.Log(I18n.NotOnFarm, LogLevel.Info);
-            return;
-        }
-
         DoClear();
     }
 
     private void DoClear()
     {
-        farmClearer.ClearFarm(
+        var location = Game1.currentLocation;
+        if (location is null)
+            return;
+
+        if (!config.EnableOnNonFarmAreas && location is not Farm)
+        {
+            Monitor.Log(I18n.NotOnFarm, LogLevel.Info);
+            return;
+        }
+
+        farmClearer.ClearLocation(
+            location,
             config.GainExperience,
             config.ClearGrass,
             config.ClearFruitTrees,
@@ -74,6 +79,14 @@ internal sealed class ModEntry : Mod
             setValue: val => config.HotKey = val,
             name: () => I18n.Config_HotKey_Name,
             tooltip: () => I18n.Config_HotKey_Tooltip
+        );
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.EnableOnNonFarmAreas,
+            setValue: val => config.EnableOnNonFarmAreas = val,
+            name: () => I18n.Config_EnableOnNonFarmAreas_Name,
+            tooltip: () => I18n.Config_EnableOnNonFarmAreas_Tooltip
         );
 
         gmcm.AddBoolOption(

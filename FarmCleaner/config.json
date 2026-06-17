@@ -1,5 +1,6 @@
 {
   "HotKey": "K",
+  "EnableOnNonFarmAreas": false,
   "GainExperience": true,
   "ClearGrass": false,
   "ClearFruitTrees": false,

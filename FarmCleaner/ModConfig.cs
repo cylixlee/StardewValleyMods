@@ -6,6 +6,7 @@ namespace CylixLee.StardewValley.FarmCleaner;
 public sealed class ModConfig
 {
     public KeybindList HotKey { get; set; } = KeybindList.Parse("K");
+    public bool EnableOnNonFarmAreas { get; set; }
     public bool GainExperience { get; set; } = true;
     public bool ClearGrass { get; set; }
     public bool ClearFruitTrees { get; set; }

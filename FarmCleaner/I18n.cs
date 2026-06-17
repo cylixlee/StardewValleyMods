@@ -17,6 +17,8 @@ internal static class I18n
 
     public static string Config_HotKey_Name => Get("config.hot-key.name");
     public static string Config_HotKey_Tooltip => Get("config.hot-key.tooltip");
+    public static string Config_EnableOnNonFarmAreas_Name => Get("config.enable-on-non-farm-areas.name");
+    public static string Config_EnableOnNonFarmAreas_Tooltip => Get("config.enable-on-non-farm-areas.tooltip");
     public static string Config_GainExperience_Name => Get("config.gain-experience.name");
     public static string Config_GainExperience_Tooltip => Get("config.gain-experience.tooltip");
     public static string Config_ClearGrass_Name => Get("config.clear-grass.name");

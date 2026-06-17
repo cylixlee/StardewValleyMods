@@ -14,6 +14,7 @@ internal class FarmClearer
 
     private readonly IModHelper modHelper;
     private readonly IMonitor modMonitor;
+    private GameLocation? activeLocation;
     private bool magnetActive;
     private readonly List<Item> deferredItems = [];
     private int stopGraceTicks;
@@ -24,7 +25,8 @@ internal class FarmClearer
         modMonitor = monitor;
     }
 
-    public void ClearFarm(
+    public void ClearLocation(
+        GameLocation location,
         bool gainExperience,
         bool clearGrass,
         bool clearFruitTrees,
@@ -36,18 +38,14 @@ internal class FarmClearer
         if (magnetActive)
             return;
 
-        var farm = Game1.getFarm();
-        if (farm is null)
-            return;
-
-        var existingDebris = new HashSet<Debris>(farm.debris);
+        var existingDebris = new HashSet<Debris>(location.debris);
 
         FarmCleanerPatches.blockExperience = !gainExperience;
         try
         {
-            var total = ClearObjects(farm)
-                      + ClearTerrainFeatures(farm, clearGrass, clearFruitTrees, clearTappedTrees, clearGrowingTrees)
-                      + ClearResourceClumps(farm, clearGiantCrops);
+            var total = ClearObjects(location)
+                      + ClearTerrainFeatures(location, clearGrass, clearFruitTrees, clearTappedTrees, clearGrowingTrees)
+                      + ClearResourceClumps(location, clearGiantCrops);
 
             if (total == 0)
             {
@@ -57,7 +55,7 @@ internal class FarmClearer
 
             modMonitor.Log(I18n.ClearedItems(total), LogLevel.Info);
 
-            foreach (var debris in farm.debris)
+            foreach (var debris in location.debris)
             {
                 var isNew = !existingDebris.Contains(debris);
 
@@ -77,6 +75,7 @@ internal class FarmClearer
                     debris.chunksMoveTowardPlayer = true;
             }
 
+            activeLocation = location;
             magnetActive = true;
             FarmCleanerPatches.magnetBoostActive = true;
             FarmCleanerPatches.capturedItems.Clear();
@@ -96,8 +95,8 @@ internal class FarmClearer
 
     private void OnMagnetTick(object? sender, UpdateTickedEventArgs e)
     {
-        var farm = Game1.getFarm();
-        if (farm is null)
+        var location = activeLocation;
+        if (location is null)
         {
             StopMagnet();
             return;
@@ -133,7 +132,7 @@ internal class FarmClearer
         var shouldStop = FarmCleanerPatches.capturedItems.Count == 0;
         if (shouldStop)
         {
-            foreach (var debris in farm.debris)
+            foreach (var debris in location.debris)
             {
                 if (debris.item is not null || !string.IsNullOrEmpty(debris.itemId.Value))
                 {
@@ -176,24 +175,25 @@ internal class FarmClearer
 
     private void StopMagnet()
     {
-        var farm = Game1.getFarm();
-        if (farm is not null)
+        var location = activeLocation;
+        if (location is not null)
         {
-            var remaining = farm.debris.Count;
-            var remainingTypes = farm.debris.GroupBy(d => d.debrisType.Value)
+            var remaining = location.debris.Count;
+            var remainingTypes = location.debris.GroupBy(d => d.debrisType.Value)
                 .Select(g => $"{g.Key}={g.Count()}");
             modMonitor.Log($"StopMagnet: remaining debris={remaining}, types=[{string.Join(", ", remainingTypes)}]", LogLevel.Debug);
         }
 
         modHelper.Events.GameLoop.UpdateTicked -= OnMagnetTick;
         magnetTicks = 0;
+        activeLocation = null;
         magnetActive = false;
         FarmCleanerPatches.magnetBoostActive = false;
         FarmCleanerPatches.capturedItems.Clear();
         FarmCleanerPatches.overflowedItems.Clear();
     }
 
-    private int ClearObjects(Farm farm)
+    private int ClearObjects(GameLocation location)
     {
         var player = Game1.player;
         var pickaxe = new Pickaxe
@@ -209,24 +209,27 @@ internal class FarmClearer
 
         var toRemove = new List<Vector2>();
 
-        foreach (var (tile, obj) in farm.Objects.Pairs)
+        foreach (var (tile, obj) in location.Objects.Pairs)
         {
             if (obj is null)
                 continue;
 
-            var qid = obj.QualifiedItemId;
+            obj.Location = location;
+            obj.TileLocation = tile;
 
-            if (IsStone(qid))
+            if (obj.IsBreakableStone())
             {
-                modHelper.Reflection.GetField<int>(obj, "health").SetValue(1);
-                obj.performToolAction(pickaxe);
+                obj.MinutesUntilReady = 1;
+                if (!obj.performToolAction(pickaxe))
+                    continue;
+                location.OnStoneDestroyed(obj.ItemId, (int)tile.X, (int)tile.Y, player);
             }
-            else if (IsWeed(qid))
+            else if (obj.IsWeeds())
             {
                 modHelper.Reflection.GetField<int>(obj, "health").SetValue(1);
                 obj.performToolAction(axe);
             }
-            else if (IsTwig(qid))
+            else if (obj.IsTwig())
             {
                 modHelper.Reflection.GetField<int>(obj, "health").SetValue(1);
                 obj.performToolAction(axe);
@@ -238,13 +241,13 @@ internal class FarmClearer
         }
 
         foreach (var tile in toRemove)
-            farm.Objects.Remove(tile);
+            location.Objects.Remove(tile);
 
         return toRemove.Count;
     }
 
     private int ClearTerrainFeatures(
-        Farm farm,
+        GameLocation location,
         bool clearGrass,
         bool clearFruitTrees,
         bool clearTappedTrees,
@@ -260,7 +263,7 @@ internal class FarmClearer
 
         var toRemove = new List<Vector2>();
 
-        foreach (var (tile, feature) in farm.terrainFeatures.Pairs)
+        foreach (var (tile, feature) in location.terrainFeatures.Pairs)
         {
             if (feature is null)
                 continue;
@@ -268,7 +271,7 @@ internal class FarmClearer
             switch (feature)
             {
                 case Tree tree:
-                    if (!clearTappedTrees && HasTapper(farm, tile))
+                    if (!clearTappedTrees && HasTapper(location, tile))
                         break;
                     if (!clearGrowingTrees && tree.growthStage.Value < 5)
                         break;
@@ -305,12 +308,12 @@ internal class FarmClearer
         }
 
         foreach (var tile in toRemove)
-            farm.terrainFeatures.Remove(tile);
+            location.terrainFeatures.Remove(tile);
 
         return toRemove.Count;
     }
 
-    private static int ClearResourceClumps(Farm farm, bool clearGiantCrops)
+    private static int ClearResourceClumps(GameLocation location, bool clearGiantCrops)
     {
         var pickaxe = new Pickaxe
         {
@@ -324,7 +327,7 @@ internal class FarmClearer
         };
         var count = 0;
 
-        var clumps = farm.resourceClumps.ToList();
+        var clumps = location.resourceClumps.ToList();
         var toRemove = new List<ResourceClump>();
 
         foreach (var clump in clumps)
@@ -339,54 +342,27 @@ internal class FarmClearer
                 (int)(clump.Tile.Y)
             );
 
-            var tool = index is 600 or 602
+            var tool = clump is GiantCrop || index is 600 or 602
                 ? (Tool)axe
                 : pickaxe;
 
             clump.health.Value = 1;
-            clump.performToolAction(tool, damage: 1, tile);
+            if (!clump.performToolAction(tool, damage: 1, tile))
+                continue;
+
             toRemove.Add(clump);
             count++;
         }
 
         foreach (var clump in toRemove)
-            farm.resourceClumps.Remove(clump);
+            location.resourceClumps.Remove(clump);
 
         return count;
     }
 
-    private static bool IsStone(string qualifiedItemId)
+    private static bool HasTapper(GameLocation location, Vector2 tile)
     {
-        return qualifiedItemId is "(O)32" or "(O)34" or "(O)36" or "(O)38"
-            or "(O)40" or "(O)42" or "(O)44" or "(O)46"
-            or "(O)48" or "(O)50" or "(O)52" or "(O)54"
-            or "(O)56" or "(O)58" or "(O)76" or "(O)77"
-            or "(O)79" or "(O)95" or "(O)290" or "(O)343"
-            or "(O)450" or "(O)668" or "(O)670" or "(O)751"
-            or "(O)760" or "(O)762" or "(O)764" or "(O)765"
-            or "(O)817" or "(O)818" or "(O)819" or "(O)843"
-            or "(O)844" or "(O)845" or "(O)846" or "(O)847"
-            or "(O)922" or "(O)923";
-    }
-
-    private static bool IsWeed(string qualifiedItemId)
-    {
-        return qualifiedItemId is "(O)313" or "(O)314" or "(O)315"
-            or "(O)316" or "(O)317" or "(O)318" or "(O)319"
-            or "(O)320" or "(O)321" or "(O)452" or "(O)674"
-            or "(O)675" or "(O)676" or "(O)677" or "(O)678"
-            or "(O)679" or "(O)750" or "(O)784" or "(O)785"
-            or "(O)786" or "(O)792" or "(O)793" or "(O)794";
-    }
-
-    private static bool IsTwig(string qualifiedItemId)
-    {
-        return qualifiedItemId is "(O)294" or "(O)295";
-    }
-
-    private static bool HasTapper(Farm farm, Vector2 tile)
-    {
-        if (!farm.Objects.TryGetValue(tile, out var obj) || obj is null)
+        if (!location.Objects.TryGetValue(tile, out var obj) || obj is null)
             return false;
         return obj.QualifiedItemId is "(BC)105" or "(BC)264";
     }

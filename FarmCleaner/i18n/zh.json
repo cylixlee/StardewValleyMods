@@ -1,10 +1,12 @@
 {
-  "not-on-farm": "你必须在你的农场才能使用此功能。",
-  "nothing-to-clear": "农场没有需要清理的东西。",
-  "cleared-items": "已清理 {{count}} 个物品。",
+  "not-on-farm": "你必须在农场才能使用此功能，除非已在配置中启用非农场区域。",
+  "nothing-to-clear": "当前位置没有需要清理的东西。",
+  "cleared-items": "已从当前位置清理 {{count}} 个物品。",
 
   "config.hot-key.name": "快捷键",
-  "config.hot-key.tooltip": "按下此键清除农场上选定类型的树木、石头、杂草和杂物。",
+  "config.hot-key.tooltip": "按下此键清除当前位置选定类型的树木、石头、杂草和杂物。",
+  "config.enable-on-non-farm-areas.name": "启用非农场区域",
+  "config.enable-on-non-farm-areas.tooltip": "启用后，快捷键和命令可清理当前非农场地图。在自定义地图上请谨慎使用。",
   "config.gain-experience.name": "获得经验",
   "config.gain-experience.tooltip": "禁用后，清除农场将不会获得经验。",
   "config.clear-grass.name": "清除草地",
@@ -20,6 +22,6 @@
   "config.drop-multiplier.name": "掉落倍率",
   "config.drop-multiplier.tooltip": "掉落物品（木材、石头、纤维等）数量的倍率。",
 
-  "command.clearfarm.summary": "清除农场上选定类型的树木、石头、杂草和杂物。",
+  "command.clearfarm.summary": "清除当前位置选定类型的树木、石头、杂草和杂物。",
   "command.clearfarm.usage": "用法: clearfarm"
 }
