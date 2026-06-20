@@ -1,0 +1,9 @@
+{
+  "Name": "Carryable Chests",
+  "Author": "cylixlee",
+  "Version": "%ProjectVersion%",
+  "Description": "Safely pick up, carry, and place player chests without losing their contents.",
+  "UniqueID": "CylixLee.StardewValley.CarryableChests",
+  "EntryDll": "CarryableChests.dll",
+  "MinimumApiVersion": "4.0.0"
+}

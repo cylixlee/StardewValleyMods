@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="CarryableChests/CarryableChests.csproj" />
   <Project Path="FarmCleaner/FarmCleaner.csproj" />
 </Solution>

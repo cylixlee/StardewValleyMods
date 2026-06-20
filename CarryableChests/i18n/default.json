@@ -1,0 +1,20 @@
+{
+  "cannot-carry.non-player-chest": "Carryable Chests: only player chests can be carried.",
+  "cannot-carry.open-chest": "Carryable Chests: close the chest before carrying it.",
+  "cannot-carry.global-inventory-chest": "Carryable Chests: global-inventory chests are not supported yet.",
+  "cannot-carry.inventory-full": "Carryable Chests: your inventory is full.",
+  "cannot-carry.remove-world-failed": "Carryable Chests: failed to remove the chest from the world.",
+  "cannot-carry.add-inventory-failed": "Carryable Chests: failed to add the chest to your inventory.",
+
+  "placement.backup-kept": "Carryable Chests: backup kept because verification failed.",
+  "multiplayer.host-pickup-only": "Carryable Chests: only the host can pick up chests in multiplayer for now.",
+  "multiplayer.host-place-only": "Carryable Chests: only the host can place carried chests in multiplayer for now.",
+
+  "recovery.carried-changed": "Carryable Chests: carried chest changed; backup preserved. Place it manually before uninstalling.",
+  "recovery.no-safe-tile": "Carryable Chests: no safe tile found for a carried chest. Backup preserved.",
+  "recovery.orphan-failed": "Carryable Chests: an orphaned chest backup could not be restored. See SMAPI log.",
+  "recovery.restored-origin": "Carryable Chests restored an orphaned chest to its original tile.",
+  "recovery.restored-inventory": "Carryable Chests restored an orphaned chest to your inventory.",
+
+  "command.recover.summary": "Re-scan carried chests and restore any orphaned backups."
+}
