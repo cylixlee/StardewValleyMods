@@ -2,6 +2,7 @@ using System.Reflection;
 using CylixLee.StardewValley.CarryableChests.Framework;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
@@ -12,15 +13,30 @@ namespace CylixLee.StardewValley.CarryableChests.Patches;
 internal static class CarryableChestPatches
 {
     private static CarryableChestCoordinator? coordinator;
+    private static Func<ModConfig>? getConfig;
+    private static bool placementAllowed;
 
-    public static void Apply(string uniqueId, IMonitor monitor, CarryableChestCoordinator coordinator)
+    public static void Apply(string uniqueId, IMonitor monitor, CarryableChestCoordinator coordinator, Func<ModConfig> getConfig)
     {
         CarryableChestPatches.coordinator = coordinator;
+        CarryableChestPatches.getConfig = getConfig;
         Harmony harmony = new(uniqueId);
 
         PatchIf(harmony,
             AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.addItem)),
             prefix: new HarmonyMethod(typeof(CarryableChestPatches), nameof(ChestAddItemPrefix)),
+            monitor: monitor);
+
+        PatchIf(harmony,
+            AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.pressUseToolButton)),
+            prefix: new HarmonyMethod(typeof(CarryableChestPatches), nameof(Game1PressUseToolButtonPrefix)),
+            postfix: new HarmonyMethod(typeof(CarryableChestPatches), nameof(Game1PressUseToolButtonPostfix)),
+            monitor: monitor);
+
+        PatchIf(harmony,
+            AccessTools.DeclaredMethod(typeof(Game1), nameof(Game1.pressActionButton),
+                [typeof(KeyboardState), typeof(MouseState), typeof(GamePadState)]),
+            prefix: new HarmonyMethod(typeof(CarryableChestPatches), nameof(Game1PressActionButtonPrefix)),
             monitor: monitor);
 
         PatchIf(harmony,
@@ -69,6 +85,19 @@ internal static class CarryableChestPatches
         }
     }
 
+    public static bool RunWithPlacementAllowed(Func<bool> action)
+    {
+        try
+        {
+            placementAllowed = true;
+            return action();
+        }
+        finally
+        {
+            placementAllowed = false;
+        }
+    }
+
     private static bool ChestAddItemPrefix(Item item, ref Item __result)
     {
         if (!ChestMetadata.IsCarriedChest(item))
@@ -76,6 +105,133 @@ internal static class CarryableChestPatches
 
         __result = item;
         return false;
+    }
+
+    private static bool Game1PressUseToolButtonPrefix(ref bool __result)
+    {
+        placementAllowed = false;
+
+        if (coordinator is null || !Context.IsWorldReady)
+            return true;
+
+        if (Game1.player.CurrentItem is Chest chest && ChestMetadata.IsCarriedChest(chest))
+        {
+            if (Context.IsMultiplayer && !Context.IsMainPlayer)
+            {
+                Game1.showRedMessage(I18n.MultiplayerHostPlaceOnly);
+                __result = true;
+                return false;
+            }
+
+            __result = TryPlaceCarriedChest(chest, coordinator);
+            return false;
+        }
+
+        if (!Context.IsPlayerFree)
+            return true;
+
+        if (Game1.player.CurrentItem is not null)
+            return true;
+
+        if (Game1.player.isMoving())
+            return true;
+
+        if (Context.IsMultiplayer && !Context.IsMainPlayer)
+        {
+            if (GetPickupTiles().Any(tile => Game1.currentLocation?.Objects.ContainsKey(tile) == true))
+            {
+                Game1.showRedMessage(I18n.MultiplayerHostPickupOnly);
+                __result = true;
+                return false;
+            }
+
+            return true;
+        }
+
+        foreach (Vector2 tile in GetPickupTiles())
+        {
+            if (!coordinator.TryPickUp(Game1.currentLocation, tile, Game1.player))
+                continue;
+
+            __result = true;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static bool TryPlaceCarriedChest(Chest chest, CarryableChestCoordinator activeCoordinator)
+    {
+        GameLocation location = Game1.currentLocation;
+        bool usePlayerGrabTile = StardewModdingAPI.Constants.TargetPlatform == GamePlatform.Android;
+        Vector2 placementGrabTile = usePlayerGrabTile
+            ? Game1.player.GetGrabTile()
+            : Game1.GetPlacementGrabTile();
+        Vector2 placementPosition;
+
+        try
+        {
+            Game1.isCheckingNonMousePlacement = usePlayerGrabTile || !Game1.IsPerformingMousePlacement();
+            placementPosition = Utility.GetNearbyValidPlacementPosition(
+                Game1.player,
+                location,
+                chest,
+                (int)placementGrabTile.X * Game1.tileSize,
+                (int)placementGrabTile.Y * Game1.tileSize);
+
+            if (!Utility.playerCanPlaceItemHere(location, chest, (int)placementPosition.X, (int)placementPosition.Y, Game1.player, show_error: true))
+                return false;
+        }
+        finally
+        {
+            Game1.isCheckingNonMousePlacement = false;
+        }
+
+        Vector2 tile = new((int)(placementPosition.X / Game1.tileSize), (int)(placementPosition.Y / Game1.tileSize));
+        if (location.Objects.ContainsKey(tile))
+            return false;
+
+        activeCoordinator.CompletePlacement(chest, location, tile, Game1.player);
+
+        return true;
+    }
+
+    private static IEnumerable<Vector2> GetPickupTiles()
+    {
+        HashSet<Vector2> seen = [];
+
+        Vector2 position = Game1.wasMouseVisibleThisFrame
+            ? new Vector2(Game1.getOldMouseX() + Game1.viewport.X, Game1.getOldMouseY() + Game1.viewport.Y)
+            : Game1.player.GetToolLocation();
+
+        foreach (Vector2 tile in new[]
+                 {
+                     new Vector2((int)(position.X / Game1.tileSize), (int)(position.Y / Game1.tileSize)),
+                     Game1.player.GetToolLocation() / Game1.tileSize
+                 })
+        {
+            Vector2 normalized = new((int)tile.X, (int)tile.Y);
+            if (seen.Add(normalized))
+                yield return normalized;
+        }
+    }
+
+    private static bool Game1PressActionButtonPrefix(ref bool __result)
+    {
+        if (coordinator is null || !Context.IsWorldReady || !Context.IsPlayerFree)
+            return true;
+
+        if (!ChestMetadata.IsCarriedChest(Game1.player.CurrentItem))
+            return true;
+
+        _ = coordinator.TryOpenHeldChest(Game1.player);
+        __result = false;
+        return false;
+    }
+
+    private static void Game1PressUseToolButtonPostfix()
+    {
+        placementAllowed = false;
     }
 
     private static void ItemCanBeDroppedPostfix(Item __instance, ref bool __result)
@@ -104,10 +260,19 @@ internal static class CarryableChestPatches
 
     private static bool ObjectPlacementActionPrefix(SObject __instance, ref bool __result)
     {
-        if (!ChestMetadata.IsCarriedChest(__instance) || !Context.IsMultiplayer || Context.IsMainPlayer)
+        if (!ChestMetadata.IsCarriedChest(__instance))
             return true;
 
-        Game1.showRedMessage(I18n.MultiplayerHostPlaceOnly);
+        if (Context.IsMultiplayer && !Context.IsMainPlayer)
+        {
+            Game1.showRedMessage(I18n.MultiplayerHostPlaceOnly);
+            __result = false;
+            return false;
+        }
+
+        if (placementAllowed)
+            return true;
+
         __result = false;
         return false;
     }

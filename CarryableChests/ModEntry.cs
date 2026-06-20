@@ -25,9 +25,8 @@ internal sealed class ModEntry : Mod
         coordinator = new CarryableChestCoordinator(Monitor, config, backups, placer);
         recovery = new RecoveryService(Monitor, backups, placer);
 
-        CarryableChestPatches.Apply(ModManifest.UniqueID, Monitor, coordinator);
+        CarryableChestPatches.Apply(ModManifest.UniqueID, Monitor, coordinator, () => config);
 
-        helper.Events.Input.ButtonPressed += OnButtonPressed;
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
         helper.Events.Display.MenuChanged += OnMenuChanged;
         helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
@@ -40,34 +39,6 @@ internal sealed class ModEntry : Mod
             (_, _) => recovery.RecoverOrphans());
     }
 
-    private void OnButtonPressed(object? sender, ButtonPressedEventArgs e)
-    {
-        if (!Context.IsWorldReady)
-            return;
-
-        if (e.Button.IsActionButton() && Context.IsPlayerFree && coordinator.TryOpenHeldChest(Game1.player))
-        {
-            Helper.Input.Suppress(e.Button);
-            return;
-        }
-
-        if (!Context.IsPlayerFree || !e.Button.IsUseToolButton())
-            return;
-
-        if (Context.IsMultiplayer && !Context.IsMainPlayer)
-        {
-            Game1.showRedMessage(I18n.MultiplayerHostPickupOnly);
-            return;
-        }
-
-        if (config.RequireEmptyHands && Game1.player.CurrentItem is not null)
-            return;
-
-        var tile = e.Button.TryGetController(out _) ? e.Cursor.GrabTile : e.Cursor.Tile;
-        if (coordinator.TryPickUp(Game1.currentLocation, tile, Game1.player))
-            Helper.Input.Suppress(e.Button);
-    }
-
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
     {
         var gmcm = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>(
@@ -77,7 +48,7 @@ internal sealed class ModEntry : Mod
 
         gmcm.Register(
             mod: ModManifest,
-            reset: () => config = new ModConfig(),
+            reset: ResetConfig,
             save: () => Helper.WriteConfig(config));
 
         gmcm.AddNumberOption(
@@ -116,6 +87,15 @@ internal sealed class ModEntry : Mod
     {
         if (e.OldMenu is ItemGrabMenu { sourceItem: Chest chest } && ChestMetadata.IsCarriedChest(chest))
             coordinator.SyncBackupForClosedMenu(chest, Game1.player);
+    }
+
+    private void ResetConfig()
+    {
+        ModConfig defaults = new();
+        config.MaximumReach = defaults.MaximumReach;
+        config.RequireEmptyHands = defaults.RequireEmptyHands;
+        config.OpenHeldChest = defaults.OpenHeldChest;
+        config.ReturnCarriedChestsBeforeSaving = defaults.ReturnCarriedChestsBeforeSaving;
     }
 
     private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)

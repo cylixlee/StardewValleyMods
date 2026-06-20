@@ -65,6 +65,7 @@ internal sealed class CarryableChestCoordinator
             return true;
         }
 
+        SelectCarriedChest(who, chest);
         Game1.playSound("pickUpItem");
         monitor.Log($"Picked up chest {carryId} from {location.Name} at {tile}.", LogLevel.Trace);
         return true;
@@ -92,11 +93,18 @@ internal sealed class CarryableChestCoordinator
 
     public bool TryOpenHeldChest(Farmer who)
     {
-        if (!config.OpenHeldChest || who.ActiveObject is not Chest chest || !ChestMetadata.IsCarriedChest(chest))
+        if (!config.OpenHeldChest || who.CurrentItem is not Chest chest || !ChestMetadata.IsCarriedChest(chest))
             return false;
 
         chest.ShowMenu();
         return true;
+    }
+
+    private static void SelectCarriedChest(Farmer who, Chest chest)
+    {
+        int index = who.Items.IndexOf(chest);
+        if (index >= 0)
+            who.CurrentToolIndex = index;
     }
 
     public void SyncBackupForClosedMenu(Chest chest, Farmer who)
