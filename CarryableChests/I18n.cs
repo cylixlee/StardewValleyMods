@@ -30,6 +30,15 @@ internal static class I18n
 
     public static string CommandRecoverSummary => Get("command.recover.summary");
 
+    public static string ConfigMaximumReachName => Get("config.maximum-reach.name");
+    public static string ConfigMaximumReachTooltip => Get("config.maximum-reach.tooltip");
+    public static string ConfigRequireEmptyHandsName => Get("config.require-empty-hands.name");
+    public static string ConfigRequireEmptyHandsTooltip => Get("config.require-empty-hands.tooltip");
+    public static string ConfigOpenHeldChestName => Get("config.open-held-chest.name");
+    public static string ConfigOpenHeldChestTooltip => Get("config.open-held-chest.tooltip");
+    public static string ConfigReturnBeforeSavingName => Get("config.return-before-saving.name");
+    public static string ConfigReturnBeforeSavingTooltip => Get("config.return-before-saving.tooltip");
+
     private static string Get(string key, object? tokens = null)
     {
         if (translations is null)

@@ -16,5 +16,14 @@
   "recovery.restored-origin": "Carryable Chests restored an orphaned chest to its original tile.",
   "recovery.restored-inventory": "Carryable Chests restored an orphaned chest to your inventory.",
 
-  "command.recover.summary": "Re-scan carried chests and restore any orphaned backups."
+  "command.recover.summary": "Re-scan carried chests and restore any orphaned backups.",
+
+  "config.maximum-reach.name": "Maximum Reach",
+  "config.maximum-reach.tooltip": "How far away a chest can be picked up from.",
+  "config.require-empty-hands.name": "Require Empty Hands",
+  "config.require-empty-hands.tooltip": "If enabled, your hands must be empty before picking up a chest.",
+  "config.open-held-chest.name": "Open Held Chest",
+  "config.open-held-chest.tooltip": "If enabled, right-click opens the chest you're carrying.",
+  "config.return-before-saving.name": "Return On Save",
+  "config.return-before-saving.tooltip": "If enabled, carried chests are put back into the world before saving."
 }

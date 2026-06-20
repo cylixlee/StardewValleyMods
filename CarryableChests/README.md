@@ -15,6 +15,8 @@ Stardew Valley mod for picking up and moving chests without emptying them first.
 
 This mod provides the following settings in [GMCM (Generic Mod Config Menu)](https://www.nexusmods.com/stardewvalley/mods/5098).
 
+![settings](./img/settings.png)
+
 ### Maximum Reach
 
 How far away a chest can be picked up from. Defaults to `1`.
@@ -27,7 +29,7 @@ Whether your hands must be empty before picking up a chest. Defaults to enabled.
 
 Whether right-click opens the chest you're carrying. Defaults to enabled.
 
-### Return Carried Chests Before Saving
+### Return On Save
 
 Whether carried chests are put back into the world before saving. Defaults to enabled.
 

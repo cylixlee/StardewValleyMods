@@ -16,5 +16,14 @@
   "recovery.restored-origin": "可携带箱子已将一个孤儿箱子恢复到原始位置。",
   "recovery.restored-inventory": "可携带箱子已将一个孤儿箱子恢复到你的背包。",
 
-  "command.recover.summary": "重新扫描携带箱子并恢复所有孤儿备份。"
+  "command.recover.summary": "重新扫描携带箱子并恢复所有孤儿备份。",
+
+  "config.maximum-reach.name": "最大距离",
+  "config.maximum-reach.tooltip": "可以从多远的位置拿起箱子。",
+  "config.require-empty-hands.name": "要求空手",
+  "config.require-empty-hands.tooltip": "启用后，必须空手才能拿起箱子。",
+  "config.open-held-chest.name": "打开手持箱子",
+  "config.open-held-chest.tooltip": "启用后，右键可以打开正在携带的箱子。",
+  "config.return-before-saving.name": "保存时放回",
+  "config.return-before-saving.tooltip": "启用后，保存前会把携带中的箱子放回世界。"
 }
