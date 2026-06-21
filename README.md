@@ -10,4 +10,14 @@ This is my original Stardew Valley mods monorepo. Checkout the subdirectories to
 
 ## Mods
 
+- [**Carryable Chests**](./CarryableChests): Stardew Valley mod for picking up and moving chests without emptying them first.
+
+  <p align="center">
+    <img src="./CarryableChests/img/cover.png" alt="Carryable Chests preview" width="520">
+  </p>
+
 - [**Farm Cleaner**](./FarmCleaner): Stardew Valley mod for cleaning the farm without hours of manual effort.
+
+  <p align="center">
+    <img src="./FarmCleaner/img/cleaner.jpg" alt="Farm Cleaner preview" width="520">
+  </p>
