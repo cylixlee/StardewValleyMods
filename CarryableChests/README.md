@@ -31,7 +31,7 @@ Whether right-click opens the chest you're carrying. Defaults to enabled.
 
 ### Return On Save
 
-Whether carried chests are put back into the world before saving. Defaults to enabled.
+Whether carried chests are put back into the world before saving. Defaults to disabled.
 
 ## Multiplayer
 
