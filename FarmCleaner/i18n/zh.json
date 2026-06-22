@@ -1,5 +1,7 @@
 {
   "not-on-farm": "你必须在农场才能使用此功能，除非已在配置中启用非农场区域。",
+  "main-player-only": "多人游戏中只有主机可以清理农场。",
+  "already-cleaning": "Farm Cleaner 仍在收集上次清理产生的掉落物。",
   "nothing-to-clear": "当前位置没有需要清理的东西。",
   "cleared-items": "已从当前位置清理 {{count}} 个物品。",
 

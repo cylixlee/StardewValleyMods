@@ -18,6 +18,7 @@ public sealed class ModConfig
     [OnDeserialized]
     private void OnDeserialized(StreamingContext context)
     {
+        HotKey ??= KeybindList.Parse("K");
         DropMultiplier = Math.Clamp(DropMultiplier, 0.1f, 10.0f);
     }
 }

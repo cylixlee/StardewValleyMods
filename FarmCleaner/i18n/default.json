@@ -1,5 +1,7 @@
 {
   "not-on-farm": "You must be on your farm to use this, unless non-farm areas are enabled in the config.",
+  "main-player-only": "Only the host can clean the farm in multiplayer.",
+  "already-cleaning": "Farm Cleaner is still collecting drops from the last cleanup.",
   "nothing-to-clear": "Nothing to clear in this location.",
   "cleared-items": "Cleared {{count}} items from this location.",
 

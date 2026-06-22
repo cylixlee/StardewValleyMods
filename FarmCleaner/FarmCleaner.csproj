@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
     <RootNamespace>CylixLee.StardewValley.FarmCleaner</RootNamespace>
-    <Version>1.4.0</Version>
+    <Version>2.0.0</Version>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <ModFolderName>FarmCleaner</ModFolderName>
