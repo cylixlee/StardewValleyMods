@@ -116,13 +116,6 @@ internal static class CarryableChestPatches
 
         if (Game1.player.CurrentItem is Chest chest && ChestMetadata.IsCarriedChest(chest))
         {
-            if (Context.IsMultiplayer && !Context.IsMainPlayer)
-            {
-                Game1.showRedMessage(I18n.MultiplayerHostPlaceOnly);
-                __result = true;
-                return false;
-            }
-
             __result = TryPlaceCarriedChest(chest, coordinator);
             return false;
         }
@@ -130,23 +123,12 @@ internal static class CarryableChestPatches
         if (!Context.IsPlayerFree)
             return true;
 
-        if (Game1.player.CurrentItem is not null)
+        ModConfig config = getConfig?.Invoke() ?? new ModConfig();
+        if (config.RequireEmptyHands && Game1.player.CurrentItem is not null)
             return true;
 
         if (Game1.player.isMoving())
             return true;
-
-        if (Context.IsMultiplayer && !Context.IsMainPlayer)
-        {
-            if (GetPickupTiles().Any(tile => Game1.currentLocation?.Objects.ContainsKey(tile) == true))
-            {
-                Game1.showRedMessage(I18n.MultiplayerHostPickupOnly);
-                __result = true;
-                return false;
-            }
-
-            return true;
-        }
 
         foreach (Vector2 tile in GetPickupTiles())
         {
@@ -191,7 +173,7 @@ internal static class CarryableChestPatches
         if (location.Objects.ContainsKey(tile))
             return false;
 
-        activeCoordinator.CompletePlacement(chest, location, tile, Game1.player);
+        activeCoordinator.TryPlaceOrRequest(chest, location, tile, Game1.player);
 
         return true;
     }
@@ -224,7 +206,9 @@ internal static class CarryableChestPatches
         if (!ChestMetadata.IsCarriedChest(Game1.player.CurrentItem))
             return true;
 
-        _ = coordinator.TryOpenHeldChest(Game1.player);
+        if (!coordinator.TryOpenHeldChest(Game1.player))
+            return true;
+
         __result = false;
         return false;
     }
@@ -263,14 +247,7 @@ internal static class CarryableChestPatches
         if (!ChestMetadata.IsCarriedChest(__instance))
             return true;
 
-        if (Context.IsMultiplayer && !Context.IsMainPlayer)
-        {
-            Game1.showRedMessage(I18n.MultiplayerHostPlaceOnly);
-            __result = false;
-            return false;
-        }
-
-        if (placementAllowed)
+        if (placementAllowed && Context.IsMainPlayer)
             return true;
 
         __result = false;

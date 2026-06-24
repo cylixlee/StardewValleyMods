@@ -12,8 +12,10 @@ internal sealed class ModEntry : Mod
 {
     private ModConfig config = null!;
     private ChestBackupStore backups = null!;
+    private CarryStateStore stateStore = null!;
     private CarryableChestCoordinator coordinator = null!;
-    private RecoveryService recovery = null!;
+    private ChestReconciliationService reconciliation = null!;
+    private CarryableChestNetworkService network = null!;
 
     public override void Entry(IModHelper helper)
     {
@@ -21,9 +23,12 @@ internal sealed class ModEntry : Mod
 
         config = helper.ReadConfig<ModConfig>();
         backups = new ChestBackupStore(Monitor);
+        stateStore = new CarryStateStore(helper, Monitor);
         WorldChestPlacer placer = new(backups);
-        coordinator = new CarryableChestCoordinator(Monitor, config, backups, placer);
-        recovery = new RecoveryService(Monitor, backups, placer);
+        coordinator = new CarryableChestCoordinator(Monitor, config, backups, placer, stateStore);
+        network = new CarryableChestNetworkService(helper.Multiplayer, Monitor, ModManifest.UniqueID, coordinator);
+        coordinator.SetNetwork(network);
+        reconciliation = new ChestReconciliationService(Monitor, backups, stateStore);
 
         CarryableChestPatches.Apply(ModManifest.UniqueID, Monitor, coordinator, () => config);
 
@@ -32,11 +37,18 @@ internal sealed class ModEntry : Mod
         helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
         helper.Events.GameLoop.Saving += OnSaving;
         helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
+        helper.Events.Multiplayer.ModMessageReceived += network.OnModMessageReceived;
+        helper.Events.Multiplayer.PeerConnected += OnPeerConnected;
+        helper.Events.Multiplayer.PeerDisconnected += OnPeerDisconnected;
 
         helper.ConsoleCommands.Add(
             "carryable_chests_recover",
-            I18n.CommandRecoverSummary,
-            (_, _) => recovery.RecoverOrphans());
+            I18n.ReconcileSummary,
+            (_, _) => reconciliation.Reconcile(repairFromVault: true));
+        helper.ConsoleCommands.Add(
+            "carryable_chests_reconcile",
+            I18n.ReconcileSummary,
+            (_, _) => reconciliation.Reconcile(repairFromVault: true));
     }
 
     private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
@@ -74,13 +86,6 @@ internal sealed class ModEntry : Mod
             setValue: val => config.OpenHeldChest = val,
             name: () => I18n.ConfigOpenHeldChestName,
             tooltip: () => I18n.ConfigOpenHeldChestTooltip);
-
-        gmcm.AddBoolOption(
-            mod: ModManifest,
-            getValue: () => config.ReturnCarriedChestsBeforeSaving,
-            setValue: val => config.ReturnCarriedChestsBeforeSaving = val,
-            name: () => I18n.ConfigReturnBeforeSavingName,
-            tooltip: () => I18n.ConfigReturnBeforeSavingTooltip);
     }
 
     private void OnMenuChanged(object? sender, MenuChangedEventArgs e)
@@ -95,24 +100,40 @@ internal sealed class ModEntry : Mod
         config.MaximumReach = defaults.MaximumReach;
         config.RequireEmptyHands = defaults.RequireEmptyHands;
         config.OpenHeldChest = defaults.OpenHeldChest;
-        config.ReturnCarriedChestsBeforeSaving = defaults.ReturnCarriedChestsBeforeSaving;
     }
 
     private void OnSaveLoaded(object? sender, SaveLoadedEventArgs e)
     {
-        recovery.RecoverOrphans();
+        stateStore.Load(backups);
+        reconciliation.Reconcile();
     }
 
     private void OnSaving(object? sender, SavingEventArgs e)
     {
-        if (config.ReturnCarriedChestsBeforeSaving)
-            recovery.ReturnCarriedChestsBeforeSaving();
-        else
-            recovery.SyncBackupsFromCarriedChests();
+        reconciliation.SyncVaultFromCarriedChests();
+        stateStore.SaveFromVault(backups);
+    }
+
+    private void OnPeerDisconnected(object? sender, PeerDisconnectedEventArgs e)
+    {
+        if (!Context.IsWorldReady || !Context.IsMainPlayer)
+            return;
+
+        stateStore.MarkOwnerOffline(e.Peer.PlayerID);
+        stateStore.SaveFromVault(backups);
+    }
+
+    private void OnPeerConnected(object? sender, PeerConnectedEventArgs e)
+    {
+        if (!Context.IsWorldReady || !Context.IsMainPlayer)
+            return;
+
+        reconciliation.Reconcile();
     }
 
     private void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
     {
         backups.ClearCachedState();
+        stateStore.ClearCachedState();
     }
 }

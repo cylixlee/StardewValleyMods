@@ -4,6 +4,7 @@ internal static class Constants
 {
     public const string ModId = "CylixLee.StardewValley.CarryableChests";
     public const string BackupInventoryId = ModId + ".Backups";
+    public const string SaveDataKey = "carry-state";
 
     public const string CarryIdKey = ModId + "/CarryId";
     public const string StateKey = ModId + "/State";
@@ -15,4 +16,9 @@ internal static class Constants
 
     public const string StateCarried = "Carried";
     public const string StateBackup = "Backup";
+
+    public const string RequestPickupMessage = "RequestPickup";
+    public const string RequestPlaceMessage = "RequestPlace";
+    public const string ActionResultMessage = "ActionResult";
+    public const string ChestUpdatedMessage = "ChestUpdated";
 }

@@ -1,29 +1,21 @@
 {
   "cannot-carry.non-player-chest": "可携带箱子：只能搬运玩家箱子。",
   "cannot-carry.open-chest": "可携带箱子：请先关闭箱子再搬运。",
-  "cannot-carry.global-inventory-chest": "可携带箱子：暂不支持全局库存箱子。",
   "cannot-carry.inventory-full": "可携带箱子：你的背包已满。",
   "cannot-carry.remove-world-failed": "可携带箱子：无法从世界中移除这个箱子。",
   "cannot-carry.add-inventory-failed": "可携带箱子：无法把这个箱子加入背包。",
 
-  "placement.backup-kept": "可携带箱子：校验失败，已保留备份。",
-  "multiplayer.host-pickup-only": "可携带箱子：多人模式下目前只有主机可以拿起箱子。",
-  "multiplayer.host-place-only": "可携带箱子：多人模式下目前只有主机可以放置携带的箱子。",
+  "multiplayer.host-pickup-only": "可携带箱子：多人同步不可用，只有主机可以拿起这个箱子。",
+  "multiplayer.host-place-only": "可携带箱子：多人同步不可用，只有主机可以放置这个箱子。",
+  "multiplayer.pickup-rejected": "可携带箱子：主机拒绝了拿起箱子的请求。",
+  "multiplayer.place-rejected": "可携带箱子：主机拒绝了放置箱子的请求。",
 
-  "recovery.carried-changed": "可携带箱子：携带中的箱子内容发生变化，已保留旧备份。卸载前请手动放下它。",
-  "recovery.no-safe-tile": "可携带箱子：没有找到可安全放置携带箱子的地格，已保留备份。",
-  "recovery.orphan-failed": "可携带箱子：无法恢复一个孤儿箱子备份，请查看 SMAPI 日志。",
-  "recovery.restored-origin": "可携带箱子已将一个孤儿箱子恢复到原始位置。",
-  "recovery.restored-inventory": "可携带箱子已将一个孤儿箱子恢复到你的背包。",
-
-  "command.recover.summary": "重新扫描携带箱子并恢复所有孤儿备份。",
+  "command.reconcile.summary": "重新扫描携带箱子并修复可靠携带状态。",
 
   "config.maximum-reach.name": "最大距离",
   "config.maximum-reach.tooltip": "可以从多远的位置拿起箱子。",
   "config.require-empty-hands.name": "要求空手",
   "config.require-empty-hands.tooltip": "启用后，必须空手才能拿起箱子。",
   "config.open-held-chest.name": "打开手持箱子",
-  "config.open-held-chest.tooltip": "启用后，右键可以打开正在携带的箱子。",
-  "config.return-before-saving.name": "保存时放回",
-  "config.return-before-saving.tooltip": "启用后，保存前会把携带中的箱子放回世界。"
+  "config.open-held-chest.tooltip": "启用后，右键可以打开正在携带的箱子。"
 }

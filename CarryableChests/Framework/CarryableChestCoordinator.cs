@@ -12,16 +12,91 @@ internal sealed class CarryableChestCoordinator
     private readonly ModConfig config;
     private readonly ChestBackupStore backups;
     private readonly WorldChestPlacer placer;
+    private readonly CarryStateStore stateStore;
+    private CarryableChestNetworkService? network;
 
-    public CarryableChestCoordinator(IMonitor monitor, ModConfig config, ChestBackupStore backups, WorldChestPlacer placer)
+    public CarryableChestCoordinator(IMonitor monitor, ModConfig config, ChestBackupStore backups, WorldChestPlacer placer, CarryStateStore stateStore)
     {
         this.monitor = monitor;
         this.config = config;
         this.backups = backups;
         this.placer = placer;
+        this.stateStore = stateStore;
+    }
+
+    public void SetNetwork(CarryableChestNetworkService networkService)
+    {
+        network = networkService;
     }
 
     public bool TryPickUp(GameLocation? location, Vector2 tile, Farmer who)
+    {
+        if (Context.IsMultiplayer && !Context.IsMainPlayer)
+            return TryRequestPickUp(location, tile, who);
+
+        CarryActionResult result = TryPickUpLocal(location, tile, who, showMessages: true);
+        return result.Handled;
+    }
+
+    internal CarryActionResult TryPickUpLocal(GameLocation? location, Vector2 tile, Farmer who, bool showMessages)
+    {
+        if (location is null)
+            return CarryActionResult.Ignored;
+
+        if (Math.Abs(who.Tile.X - tile.X) > config.MaximumReach || Math.Abs(who.Tile.Y - tile.Y) > config.MaximumReach)
+            return CarryActionResult.Ignored;
+
+        if (!location.Objects.TryGetValue(tile, out SObject? obj) || obj is not Chest chest)
+            return CarryActionResult.Ignored;
+
+        if (!CanCarry(chest, out string reason))
+        {
+            if (showMessages)
+                Game1.showRedMessage(reason);
+            return CarryActionResult.Failed(reason);
+        }
+
+        if (!who.couldInventoryAcceptThisItem(chest))
+        {
+            if (showMessages)
+                Game1.showRedMessage(I18n.CannotCarryInventoryFull);
+            return CarryActionResult.Failed(I18n.CannotCarryInventoryFull);
+        }
+
+        string carryId = ChestMetadata.EnsureCarryId(chest);
+        ChestMetadata.MarkCarried(chest, carryId, location, tile, who);
+        backups.Upsert(chest, carryId, location, tile, who);
+        stateStore.Upsert(chest, carryId, location, tile, who, Constants.StateCarried);
+
+        if (!location.Objects.Remove(tile))
+        {
+            backups.Remove(carryId);
+            stateStore.Remove(carryId);
+            ChestMetadata.Clear(chest);
+            if (showMessages)
+                Game1.showRedMessage(I18n.CannotCarryRemoveWorldFailed);
+            return CarryActionResult.Failed(I18n.CannotCarryRemoveWorldFailed);
+        }
+
+        if (!who.addItemToInventoryBool(chest, true))
+        {
+            location.Objects[tile] = chest;
+            backups.Remove(carryId);
+            stateStore.Remove(carryId);
+            ChestMetadata.Clear(chest);
+            if (showMessages)
+                Game1.showRedMessage(I18n.CannotCarryAddInventoryFailed);
+            return CarryActionResult.Failed(I18n.CannotCarryAddInventoryFailed);
+        }
+
+        SelectCarriedChest(who, chest);
+        if (who == Game1.player)
+            Game1.playSound("pickUpItem");
+        monitor.Log($"Picked up chest {carryId} from {location.Name} at {tile}.", LogLevel.Trace);
+        return CarryActionResult.Succeeded;
+    }
+
+    private bool TryRequestPickUp(GameLocation? location, Vector2 tile, Farmer who)
     {
         if (location is null)
             return false;
@@ -44,30 +119,13 @@ internal sealed class CarryableChestCoordinator
             return true;
         }
 
-        string carryId = ChestMetadata.EnsureCarryId(chest);
-        ChestMetadata.MarkCarried(chest, carryId, location, tile, who);
-        backups.Ensure(chest, carryId, location, tile, who, allowOverwrite: true);
-
-        if (!location.Objects.Remove(tile))
+        if (network is null)
         {
-            backups.Remove(carryId);
-            ChestMetadata.Clear(chest);
-            Game1.showRedMessage(I18n.CannotCarryRemoveWorldFailed);
+            Game1.showRedMessage(I18n.MultiplayerHostPickupOnly);
             return true;
         }
 
-        if (!who.addItemToInventoryBool(chest, true))
-        {
-            location.Objects[tile] = chest;
-            backups.Remove(carryId);
-            ChestMetadata.Clear(chest);
-            Game1.showRedMessage(I18n.CannotCarryAddInventoryFailed);
-            return true;
-        }
-
-        SelectCarriedChest(who, chest);
-        Game1.playSound("pickUpItem");
-        monitor.Log($"Picked up chest {carryId} from {location.Name} at {tile}.", LogLevel.Trace);
+        network.RequestPickup(location, tile);
         return true;
     }
 
@@ -76,19 +134,29 @@ internal sealed class CarryableChestCoordinator
         if (!ChestMetadata.TryGetCarryId(chest, out string carryId))
             return;
 
-        backups.Ensure(chest, carryId, location, tile, who, allowOverwrite: false);
-        bool verified = backups.Matches(carryId, chest);
-
-        placer.PlaceCarriedChest(chest, carryId, location, tile, who, clearBackup: verified);
-
-        if (!verified)
-        {
-            monitor.Log($"Placed chest {carryId}, but its backup fingerprint does not match. Keeping backup for recovery.", LogLevel.Warn);
-            Game1.showRedMessage(I18n.PlacementBackupKept);
-            return;
-        }
+        backups.Upsert(chest, carryId, location, tile, who);
+        placer.PlaceCarriedChest(chest, carryId, location, tile, who, clearBackup: true);
+        stateStore.Remove(carryId);
 
         monitor.Log($"Placed chest {carryId} at {location.Name} {tile}.", LogLevel.Trace);
+    }
+
+    public bool TryPlaceOrRequest(Chest chest, GameLocation location, Vector2 tile, Farmer who)
+    {
+        if (Context.IsMultiplayer && !Context.IsMainPlayer)
+        {
+            if (network is null)
+            {
+                Game1.showRedMessage(I18n.MultiplayerHostPlaceOnly);
+                return true;
+            }
+
+            network.RequestPlace(chest, location, tile);
+            return true;
+        }
+
+        CompletePlacement(chest, location, tile, who);
+        return true;
     }
 
     public bool TryOpenHeldChest(Farmer who)
@@ -112,12 +180,20 @@ internal sealed class CarryableChestCoordinator
         if (!ChestMetadata.TryGetCarryId(chest, out string carryId))
             return;
 
+        if (Context.IsMultiplayer && !Context.IsMainPlayer)
+        {
+            network?.NotifyChestUpdated(carryId);
+            return;
+        }
+
         string locationName = chest.modData.TryGetValue(Constants.OriginLocationKey, out string originLocation)
             ? originLocation
             : who.currentLocation?.Name ?? string.Empty;
 
         Vector2 originTile = ChestMetadata.GetOriginTile(chest) ?? who.Tile;
-        backups.Upsert(chest, carryId, Game1.getLocationFromName(locationName) ?? who.currentLocation, originTile, who);
+        GameLocation? location = Game1.getLocationFromName(locationName) ?? who.currentLocation;
+        backups.Upsert(chest, carryId, location, originTile, who);
+        stateStore.Upsert(chest, carryId, location, originTile, who, Constants.StateCarried);
     }
 
     private static bool CanCarry(Chest chest, out string reason)
@@ -134,13 +210,22 @@ internal sealed class CarryableChestCoordinator
             return false;
         }
 
-        if (!string.IsNullOrWhiteSpace(chest.GlobalInventoryId))
-        {
-            reason = I18n.CannotCarryGlobalInventoryChest;
-            return false;
-        }
-
         reason = string.Empty;
         return true;
+    }
+
+    internal Chest? FindCarriedChest(Farmer who, string carryId)
+    {
+        return who.Items.OfType<Chest>().FirstOrDefault(chest =>
+            ChestMetadata.IsCarriedChest(chest)
+            && ChestMetadata.TryGetCarryId(chest, out string id)
+            && id == carryId);
+    }
+
+    internal readonly record struct CarryActionResult(bool Handled, bool Success, string? ErrorMessage)
+    {
+        public static CarryActionResult Ignored => new(false, false, null);
+        public static CarryActionResult Succeeded => new(true, true, null);
+        public static CarryActionResult Failed(string errorMessage) => new(true, false, errorMessage);
     }
 }

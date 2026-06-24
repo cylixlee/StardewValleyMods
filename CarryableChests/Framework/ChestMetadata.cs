@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.Inventories;
 using StardewValley.Objects;
 using SObject = StardewValley.Object;
 
@@ -35,7 +36,7 @@ internal static class ChestMetadata
         chest.modData[Constants.CarryIdKey] = carryId;
         chest.modData[Constants.StateKey] = Constants.StateCarried;
         chest.modData[Constants.FingerprintKey] = GetFingerprint(chest);
-        chest.modData[Constants.OriginLocationKey] = location?.Name ?? string.Empty;
+        chest.modData[Constants.OriginLocationKey] = location?.NameOrUniqueName ?? string.Empty;
         chest.modData[Constants.OriginTileXKey] = ((int)tile.X).ToString();
         chest.modData[Constants.OriginTileYKey] = ((int)tile.Y).ToString();
         chest.modData[Constants.OwnerKey] = who.UniqueMultiplayerID.ToString();
@@ -69,22 +70,54 @@ internal static class ChestMetadata
     {
         Chest clone = new(source.playerChest.Value, source.ItemId)
         {
-            GlobalInventoryId = null,
             fridge = { Value = source.fridge.Value },
+            giftbox = { Value = source.giftbox.Value },
+            giftboxIndex = { Value = source.giftboxIndex.Value },
+            giftboxIsStarterGift = { Value = source.giftboxIsStarterGift.Value },
+            dropContents = { Value = source.dropContents.Value },
+            synchronized = { Value = source.synchronized.Value },
             playerChoiceColor = { Value = source.playerChoiceColor.Value },
+            startingLidFrame = { Value = source.startingLidFrame.Value },
+            lidFrameCount = { Value = source.lidFrameCount.Value },
+            frameCounter = { Value = -1 },
+            bigCraftableSpriteIndex = { Value = source.bigCraftableSpriteIndex.Value },
             SpecialChestType = source.SpecialChestType,
+            GlobalInventoryId = source.GlobalInventoryId,
             Tint = source.Tint
         };
 
         clone.CopyFieldsFrom(source);
-        clone.GlobalInventoryId = null;
-        clone.Items.Clear();
+        clone.GlobalInventoryId = source.GlobalInventoryId;
+        clone.SpecialChestType = source.SpecialChestType;
+        clone.fridge.Value = source.fridge.Value;
+        clone.giftbox.Value = source.giftbox.Value;
+        clone.giftboxIndex.Value = source.giftboxIndex.Value;
+        clone.giftboxIsStarterGift.Value = source.giftboxIsStarterGift.Value;
+        clone.dropContents.Value = source.dropContents.Value;
+        clone.synchronized.Value = source.synchronized.Value;
+        clone.playerChoiceColor.Value = source.playerChoiceColor.Value;
+        clone.startingLidFrame.Value = source.startingLidFrame.Value;
+        clone.lidFrameCount.Value = source.lidFrameCount.Value;
+        clone.frameCounter.Value = -1;
+        clone.bigCraftableSpriteIndex.Value = source.bigCraftableSpriteIndex.Value;
+        clone.Tint = source.Tint;
 
-        foreach (Item item in source.GetItemsForPlayer().Where(item => item is not null))
+        clone.Items.Clear();
+        foreach (Item item in CloneItems(source.Items))
         {
-            Item itemClone = item.getOne();
-            itemClone.Stack = item.Stack;
-            clone.Items.Add(itemClone);
+            clone.Items.Add(item);
+        }
+
+        clone.separateWalletItems.Clear();
+        foreach (KeyValuePair<long, Inventory> wallet in source.separateWalletItems.Pairs)
+        {
+            Inventory copy = new();
+            foreach (Item item in CloneItems(wallet.Value))
+            {
+                copy.Add(item);
+            }
+
+            clone.separateWalletItems[wallet.Key] = copy;
         }
 
         return clone;
@@ -92,9 +125,43 @@ internal static class ChestMetadata
 
     public static string GetFingerprint(Chest chest)
     {
-        return string.Join("|", chest.GetItemsForPlayer()
+        string items = string.Join("|", chest.Items
             .Where(item => item is not null)
             .Select(GetItemFingerprint));
+
+        string wallets = string.Join("|", chest.separateWalletItems.Pairs
+            .OrderBy(pair => pair.Key)
+            .Select(pair => pair.Key + ":" + string.Join(",", pair.Value
+                .Where(item => item is not null)
+                .Select(GetItemFingerprint))));
+
+        return string.Join(";", new[]
+        {
+            chest.QualifiedItemId,
+            chest.SpecialChestType.ToString(),
+            chest.GlobalInventoryId ?? string.Empty,
+            chest.playerChest.Value.ToString(),
+            chest.fridge.Value.ToString(),
+            chest.giftbox.Value.ToString(),
+            chest.playerChoiceColor.Value.PackedValue.ToString(),
+            chest.Tint.PackedValue.ToString(),
+            items,
+            wallets
+        });
+    }
+
+    private static IEnumerable<Item> CloneItems(IEnumerable<Item?> items)
+    {
+        foreach (Item? item in items)
+        {
+            if (item is null)
+                continue;
+
+            Item clone = item.getOne();
+            clone.CopyFieldsFrom(item);
+            clone.Stack = item.Stack;
+            yield return clone;
+        }
     }
 
     private static string GetItemFingerprint(Item item)
