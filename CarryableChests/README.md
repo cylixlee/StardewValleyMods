@@ -29,8 +29,16 @@ Whether right-click opens the chest you're carrying. Defaults to enabled.
 
 ## Multiplayer
 
-PC multiplayer is supported through host-authoritative requests. Farmhands ask the host to pick up or place chests, and carried chests remain valid durable state across saves and disconnects.
+PC multiplayer is supported. Farmhands can pick up and place chests; the host coordinates the world changes.
+
+Carried chests stay carried across saves, disconnects, and reconnects. They are not automatically returned to the world.
+
+## Supported Chests
+
+All player chest variants are supported, including normal chests, stone chests, big chests, Junimo Chests, Mini Shipping Bins, auto-loaders, and enrichers.
+
+Non-player reward, treasure, and gift chests are not carryable.
 
 ## Limitations
 
-All player chest variants are supported, including special storage types like Junimo Chests, Mini Shipping Bins, auto-loaders, enrichers, and big chest variants.
+Multiplayer support is currently targeted at PC. Android multiplayer is not validated yet.
