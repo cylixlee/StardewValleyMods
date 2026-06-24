@@ -13,6 +13,7 @@ internal static class I18n
 
     public static string CannotCarryNonPlayerChest => Get("cannot-carry.non-player-chest");
     public static string CannotCarryOpenChest => Get("cannot-carry.open-chest");
+    public static string CannotCarryInTransition => Get("cannot-carry.in-transition");
     public static string CannotCarryInventoryFull => Get("cannot-carry.inventory-full");
     public static string CannotCarryRemoveWorldFailed => Get("cannot-carry.remove-world-failed");
     public static string CannotCarryAddInventoryFailed => Get("cannot-carry.add-inventory-failed");

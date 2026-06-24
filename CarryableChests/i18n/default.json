@@ -1,6 +1,7 @@
 {
   "cannot-carry.non-player-chest": "Carryable Chests: only player chests can be carried.",
   "cannot-carry.open-chest": "Carryable Chests: close the chest before carrying it.",
+  "cannot-carry.in-transition": "Carryable Chests: this chest is already being moved.",
   "cannot-carry.inventory-full": "Carryable Chests: your inventory is full.",
   "cannot-carry.remove-world-failed": "Carryable Chests: failed to remove the chest from the world.",
   "cannot-carry.add-inventory-failed": "Carryable Chests: failed to add the chest to your inventory.",

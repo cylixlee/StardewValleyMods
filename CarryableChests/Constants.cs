@@ -16,9 +16,14 @@ internal static class Constants
 
     public const string StateCarried = "Carried";
     public const string StateBackup = "Backup";
+    public const string StatePendingPlace = "PendingPlace";
 
     public const string RequestPickupMessage = "RequestPickup";
+    public const string PickupApprovedMessage = "PickupApproved";
+    public const string PickupAppliedMessage = "PickupApplied";
     public const string RequestPlaceMessage = "RequestPlace";
+    public const string PlaceCommittedMessage = "PlaceCommitted";
+    public const string PlaceAppliedMessage = "PlaceApplied";
     public const string ActionResultMessage = "ActionResult";
     public const string ChestUpdatedMessage = "ChestUpdated";
 }

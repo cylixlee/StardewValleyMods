@@ -1,6 +1,7 @@
 {
   "cannot-carry.non-player-chest": "可携带箱子：只能搬运玩家箱子。",
   "cannot-carry.open-chest": "可携带箱子：请先关闭箱子再搬运。",
+  "cannot-carry.in-transition": "可携带箱子：这个箱子正在被搬运。",
   "cannot-carry.inventory-full": "可携带箱子：你的背包已满。",
   "cannot-carry.remove-world-failed": "可携带箱子：无法从世界中移除这个箱子。",
   "cannot-carry.add-inventory-failed": "可携带箱子：无法把这个箱子加入背包。",

@@ -38,7 +38,7 @@ internal sealed class CarryableChestCoordinator
         return result.Handled;
     }
 
-    internal CarryActionResult TryPickUpLocal(GameLocation? location, Vector2 tile, Farmer who, bool showMessages)
+    internal CarryActionResult TryPickUpLocal(GameLocation? location, Vector2 tile, Farmer who, bool showMessages, bool cloneForInventory = false)
     {
         if (location is null)
             return CarryActionResult.Ignored;
@@ -67,6 +67,9 @@ internal sealed class CarryableChestCoordinator
         ChestMetadata.MarkCarried(chest, carryId, location, tile, who);
         backups.Upsert(chest, carryId, location, tile, who);
         stateStore.Upsert(chest, carryId, location, tile, who, Constants.StateCarried);
+        Chest inventoryChest = cloneForInventory ? ChestMetadata.CloneChest(chest) : chest;
+        if (cloneForInventory)
+            ChestMetadata.MarkCarried(inventoryChest, carryId, location, tile, who);
 
         if (!location.Objects.Remove(tile))
         {
@@ -78,7 +81,7 @@ internal sealed class CarryableChestCoordinator
             return CarryActionResult.Failed(I18n.CannotCarryRemoveWorldFailed);
         }
 
-        if (!who.addItemToInventoryBool(chest, true))
+        if (!who.addItemToInventoryBool(inventoryChest, true))
         {
             location.Objects[tile] = chest;
             backups.Remove(carryId);
@@ -89,11 +92,69 @@ internal sealed class CarryableChestCoordinator
             return CarryActionResult.Failed(I18n.CannotCarryAddInventoryFailed);
         }
 
-        SelectCarriedChest(who, chest);
+        SelectCarriedChest(who, inventoryChest);
         if (who == Game1.player)
             Game1.playSound("pickUpItem");
         monitor.Log($"Picked up chest {carryId} from {location.Name} at {tile}.", LogLevel.Trace);
         return CarryActionResult.Succeeded;
+    }
+
+    internal CarryActionResult PrepareRemotePickup(GameLocation? location, Vector2 tile, Farmer who, out string carryId)
+    {
+        carryId = string.Empty;
+
+        if (location is null)
+            return CarryActionResult.Ignored;
+
+        if (Math.Abs(who.Tile.X - tile.X) > config.MaximumReach || Math.Abs(who.Tile.Y - tile.Y) > config.MaximumReach)
+            return CarryActionResult.Ignored;
+
+        if (!location.Objects.TryGetValue(tile, out SObject? obj) || obj is not Chest chest)
+            return CarryActionResult.Ignored;
+
+        if (!CanCarry(chest, out string reason))
+            return CarryActionResult.Failed(reason);
+
+        if (!who.couldInventoryAcceptThisItem(chest))
+            return CarryActionResult.Failed(I18n.CannotCarryInventoryFull);
+
+        carryId = ChestMetadata.EnsureCarryId(chest);
+        ChestMetadata.MarkCarried(chest, carryId, location, tile, who);
+        backups.Upsert(chest, carryId, location, tile, who);
+        stateStore.Upsert(chest, carryId, location, tile, who, Constants.StateCarried);
+        monitor.Log($"Prepared remote pickup {carryId} for player {who.UniqueMultiplayerID} from {location.NameOrUniqueName} at {tile}.", LogLevel.Info);
+        return CarryActionResult.Succeeded;
+    }
+
+    internal bool CommitRemotePickup(GameLocation? location, Vector2 tile, string carryId, Farmer who)
+    {
+        if (location is null)
+            return false;
+
+        if (!location.Objects.TryGetValue(tile, out SObject? obj) || obj is not Chest chest)
+            return false;
+
+        if (!ChestMetadata.TryGetCarryId(chest, out string worldCarryId) || worldCarryId != carryId)
+            return false;
+
+        bool removed = location.Objects.Remove(tile);
+        if (removed)
+            monitor.Log($"Committed remote pickup {carryId} for player {who.UniqueMultiplayerID}; removed world chest from {location.NameOrUniqueName} at {tile}.", LogLevel.Info);
+
+        return removed;
+    }
+
+    internal void CancelRemotePickup(GameLocation? location, Vector2 tile, string carryId)
+    {
+        if (location?.Objects.TryGetValue(tile, out SObject? obj) == true && obj is Chest chest)
+        {
+            if (ChestMetadata.TryGetCarryId(chest, out string worldCarryId) && worldCarryId == carryId)
+                ChestMetadata.Clear(chest);
+        }
+
+        backups.Remove(carryId);
+        stateStore.Remove(carryId);
+        monitor.Log($"Cancelled remote pickup {carryId}; durable vault entry cleared and world chest left in place.", LogLevel.Warn);
     }
 
     private bool TryRequestPickUp(GameLocation? location, Vector2 tile, Farmer who)
@@ -139,6 +200,26 @@ internal sealed class CarryableChestCoordinator
         stateStore.Remove(carryId);
 
         monitor.Log($"Placed chest {carryId} at {location.Name} {tile}.", LogLevel.Trace);
+    }
+
+    internal void CompleteRemotePlacement(Chest carriedChest, GameLocation location, Vector2 tile, Farmer who)
+    {
+        if (!ChestMetadata.TryGetCarryId(carriedChest, out string carryId))
+            return;
+
+        backups.Upsert(carriedChest, carryId, location, tile, who);
+        stateStore.Upsert(carriedChest, carryId, location, tile, who, Constants.StatePendingPlace);
+
+        Chest worldChest = ChestMetadata.CloneChest(carriedChest);
+        placer.PlaceCarriedChest(worldChest, carryId, location, tile, who, clearBackup: false);
+        monitor.Log($"Committed remote placement {carryId} for player {who.UniqueMultiplayerID} at {location.NameOrUniqueName} {tile}; waiting for client inventory removal.", LogLevel.Info);
+    }
+
+    internal void FinalizeRemotePlacement(string carryId)
+    {
+        backups.Remove(carryId);
+        stateStore.Remove(carryId);
+        monitor.Log($"Finalized remote placement {carryId}; durable vault entry cleared.", LogLevel.Info);
     }
 
     public bool TryPlaceOrRequest(Chest chest, GameLocation location, Vector2 tile, Farmer who)
@@ -210,6 +291,12 @@ internal sealed class CarryableChestCoordinator
             return false;
         }
 
+        if (chest.modData.ContainsKey(Constants.CarryIdKey))
+        {
+            reason = I18n.CannotCarryInTransition;
+            return false;
+        }
+
         reason = string.Empty;
         return true;
     }
@@ -220,6 +307,11 @@ internal sealed class CarryableChestCoordinator
             ChestMetadata.IsCarriedChest(chest)
             && ChestMetadata.TryGetCarryId(chest, out string id)
             && id == carryId);
+    }
+
+    internal Chest? FindVaultChest(string carryId)
+    {
+        return backups.Find(carryId);
     }
 
     internal readonly record struct CarryActionResult(bool Handled, bool Success, string? ErrorMessage)
