@@ -18,5 +18,18 @@
   "config.require-empty-hands.name": "Require Empty Hands",
   "config.require-empty-hands.tooltip": "If enabled, your hands must be empty before picking up a chest.",
   "config.open-held-chest.name": "Open Held Chest",
-  "config.open-held-chest.tooltip": "If enabled, right-click opens the chest you're carrying."
+  "config.open-held-chest.tooltip": "If enabled, right-click opens the chest you're carrying.",
+  "config.heavy-chest-slowdown.name": "Heavy Chest Slowdown",
+  "config.heavy-chest-slowdown.tooltip": "Settings for slowing the player while carrying fuller chests.",
+  "config.heavy-chest-slowdown.enabled.name": "Enabled",
+  "config.heavy-chest-slowdown.enabled.tooltip": "Whether heavy chest slowdown is enabled.",
+  "config.slowdown-starts-at.name": "Starts At",
+  "config.slowdown-starts-at.tooltip": "Chest fill percentage before slowdown starts.",
+  "config.max-speed-penalty.name": "Max Penalty",
+  "config.max-speed-penalty.tooltip": "Maximum speed penalty when the carried chest is full.",
+  "config.show-slowdown-icon.name": "Show Icon",
+  "config.show-slowdown-icon.tooltip": "If enabled, show the slowdown debuff icon in the UI.",
+
+  "buff.heavy-chest-slowdown.name": "Heavy Chest",
+  "buff.heavy-chest-slowdown.description": "The chest you're carrying is slowing you down."
 }

@@ -27,6 +27,28 @@ Whether your hands must be empty before picking up a chest. Defaults to enabled.
 
 Whether right-click opens the chest you're carrying. Defaults to enabled.
 
+### Heavy Chest Slowdown
+
+Whether fuller carried chests slow you down.
+
+#### Enabled
+
+Whether heavy chest slowdown is enabled. Defaults to `false`.
+
+#### Starts At
+
+Chest fill percentage before slowdown starts. Defaults to `50`.
+
+Set this to `100` if you only want full chests to slow you down.
+
+#### Max Penalty
+
+Maximum speed penalty when the carried chest is full. Defaults to `1`.
+
+#### Show Icon
+
+Whether to show the slowdown debuff icon in the UI. Defaults to `false`.
+
 ## Multiplayer
 
 PC multiplayer is supported. Farmhands can pick up and place chests; the host coordinates the world changes.

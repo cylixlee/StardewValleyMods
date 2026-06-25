@@ -31,6 +31,18 @@ internal static class I18n
     public static string ConfigRequireEmptyHandsTooltip => Get("config.require-empty-hands.tooltip");
     public static string ConfigOpenHeldChestName => Get("config.open-held-chest.name");
     public static string ConfigOpenHeldChestTooltip => Get("config.open-held-chest.tooltip");
+    public static string ConfigHeavyChestSlowdownName => Get("config.heavy-chest-slowdown.name");
+    public static string ConfigHeavyChestSlowdownTooltip => Get("config.heavy-chest-slowdown.tooltip");
+    public static string ConfigHeavyChestSlowdownEnabledName => Get("config.heavy-chest-slowdown.enabled.name");
+    public static string ConfigHeavyChestSlowdownEnabledTooltip => Get("config.heavy-chest-slowdown.enabled.tooltip");
+    public static string ConfigSlowdownStartsAtName => Get("config.slowdown-starts-at.name");
+    public static string ConfigSlowdownStartsAtTooltip => Get("config.slowdown-starts-at.tooltip");
+    public static string ConfigMaxSpeedPenaltyName => Get("config.max-speed-penalty.name");
+    public static string ConfigMaxSpeedPenaltyTooltip => Get("config.max-speed-penalty.tooltip");
+    public static string ConfigShowSlowdownIconName => Get("config.show-slowdown-icon.name");
+    public static string ConfigShowSlowdownIconTooltip => Get("config.show-slowdown-icon.tooltip");
+    public static string HeavyChestSlowdownName => Get("buff.heavy-chest-slowdown.name");
+    public static string HeavyChestSlowdownDescription => Get("buff.heavy-chest-slowdown.description");
 
     private static string Get(string key, object? tokens = null)
     {

@@ -18,5 +18,18 @@
   "config.require-empty-hands.name": "要求空手",
   "config.require-empty-hands.tooltip": "启用后，必须空手才能拿起箱子。",
   "config.open-held-chest.name": "打开手持箱子",
-  "config.open-held-chest.tooltip": "启用后，右键可以打开正在携带的箱子。"
+  "config.open-held-chest.tooltip": "启用后，右键可以打开正在携带的箱子。",
+  "config.heavy-chest-slowdown.name": "重箱子减速",
+  "config.heavy-chest-slowdown.tooltip": "携带越满的箱子时减速的相关设置。",
+  "config.heavy-chest-slowdown.enabled.name": "启用",
+  "config.heavy-chest-slowdown.enabled.tooltip": "是否启用重箱子减速。",
+  "config.slowdown-starts-at.name": "起始比例",
+  "config.slowdown-starts-at.tooltip": "箱子填充到多少百分比后开始减速。",
+  "config.max-speed-penalty.name": "最大惩罚",
+  "config.max-speed-penalty.tooltip": "手持箱子装满时的最大速度惩罚。",
+  "config.show-slowdown-icon.name": "显示图标",
+  "config.show-slowdown-icon.tooltip": "启用后，在 UI 中显示重箱子减速图标。",
+
+  "buff.heavy-chest-slowdown.name": "重箱子",
+  "buff.heavy-chest-slowdown.description": "你携带的箱子太重，拖慢了你的速度。"
 }
