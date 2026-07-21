@@ -206,8 +206,9 @@ internal static class CarryableChestPatches
         if (!ChestMetadata.IsCarriedChest(Game1.player.CurrentItem))
             return true;
 
-        if (!coordinator.TryOpenHeldChest(Game1.player))
-            return true;
+        ModConfig config = getConfig?.Invoke() ?? new ModConfig();
+        if (config.OpenHeldChest)
+            coordinator.TryOpenHeldChest(Game1.player);
 
         __result = false;
         return false;
