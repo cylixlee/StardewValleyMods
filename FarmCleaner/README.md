@@ -14,7 +14,7 @@ This mod provides the following settings.
 
 ### Hot Key
 
-The key to clear selected trees, stones, grass, and debris from the current location. Defaults to `K`.
+The key to clear selected trees, stones, bushes, grass, and debris from the current location. Defaults to `K`.
 
 ### Enable On Non-Farm Areas
 
@@ -27,6 +27,10 @@ Whether to gain experience from clearing the farm. Defaults to enabled. When dis
 ### Clear Grass
 
 Whether to clear grass. Defaults to disabled — grass will not be cleared.
+
+### Clear Bushes
+
+Whether to clear destroyable bushes. Defaults to disabled — bushes will not be cleared.
 
 ### Clear Fruit Trees
 

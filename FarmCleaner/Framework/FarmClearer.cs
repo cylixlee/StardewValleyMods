@@ -179,6 +179,15 @@ internal sealed class FarmClearer
                     cleared++;
                     break;
 
+                case Bush bush:
+                    bush.health = -1f;
+                    if (!bush.performToolAction(axe, explosion: 0, tile))
+                        break;
+
+                    location.terrainFeatures.Remove(tile);
+                    cleared++;
+                    break;
+
                 case Grass grass:
                     int weeds = Math.Max(1, grass.numberOfWeeds.Value);
                     for (int i = 0; i < weeds; i++)
@@ -199,6 +208,7 @@ internal sealed class FarmClearer
             Tree tree => (options.ClearTappedTrees || !HasTapper(location, tile))
                 && (options.ClearGrowingTrees || tree.growthStage.Value >= MatureTreeGrowthStage),
             FruitTree => options.ClearFruitTrees,
+            Bush => options.ClearBushes,
             Grass => options.ClearGrass,
             _ => false
         };

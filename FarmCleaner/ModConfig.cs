@@ -9,6 +9,7 @@ public sealed class ModConfig
     public bool EnableOnNonFarmAreas { get; set; }
     public bool GainExperience { get; set; } = true;
     public bool ClearGrass { get; set; }
+    public bool ClearBushes { get; set; }
     public bool ClearFruitTrees { get; set; }
     public bool ClearTappedTrees { get; set; }
     public bool ClearGrowingTrees { get; set; }

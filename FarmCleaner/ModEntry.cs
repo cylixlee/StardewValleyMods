@@ -66,6 +66,7 @@ internal sealed class ModEntry : Mod
             new CleanupOptions(
                 config.GainExperience,
                 config.ClearGrass,
+                config.ClearBushes,
                 config.ClearFruitTrees,
                 config.ClearTappedTrees,
                 config.ClearGrowingTrees,
@@ -112,6 +113,13 @@ internal sealed class ModEntry : Mod
             setValue: value => config.ClearGrass = value,
             name: () => I18n.ConfigClearGrassName,
             tooltip: () => I18n.ConfigClearGrassTooltip);
+
+        gmcm.AddBoolOption(
+            mod: ModManifest,
+            getValue: () => config.ClearBushes,
+            setValue: value => config.ClearBushes = value,
+            name: () => I18n.ConfigClearBushesName,
+            tooltip: () => I18n.ConfigClearBushesTooltip);
 
         gmcm.AddBoolOption(
             mod: ModManifest,

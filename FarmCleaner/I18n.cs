@@ -25,6 +25,8 @@ internal static class I18n
     public static string ConfigGainExperienceTooltip => Get("config.gain-experience.tooltip");
     public static string ConfigClearGrassName => Get("config.clear-grass.name");
     public static string ConfigClearGrassTooltip => Get("config.clear-grass.tooltip");
+    public static string ConfigClearBushesName => Get("config.clear-bushes.name");
+    public static string ConfigClearBushesTooltip => Get("config.clear-bushes.tooltip");
     public static string ConfigClearFruitTreesName => Get("config.clear-fruit-trees.name");
     public static string ConfigClearFruitTreesTooltip => Get("config.clear-fruit-trees.tooltip");
     public static string ConfigClearTappedTreesName => Get("config.clear-tapped-trees.name");

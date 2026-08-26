@@ -6,13 +6,15 @@
   "cleared-items": "Cleared {{count}} items from this location.",
 
   "config.hot-key.name": "Hot Key",
-  "config.hot-key.tooltip": "Key to clear selected trees, stones, grass, and debris from the current location.",
+  "config.hot-key.tooltip": "Key to clear selected trees, stones, bushes, grass, and debris from the current location.",
   "config.enable-on-non-farm-areas.name": "Enable On Non-Farm Areas",
   "config.enable-on-non-farm-areas.tooltip": "If enabled, the hot key and command can clear the current non-farm location. Use with care on custom maps.",
   "config.gain-experience.name": "Gain Experience",
   "config.gain-experience.tooltip": "If disabled, no experience is gained from clearing the farm.",
   "config.clear-grass.name": "Clear Grass",
   "config.clear-grass.tooltip": "If enabled, grass will also be cleared.",
+  "config.clear-bushes.name": "Clear Bushes",
+  "config.clear-bushes.tooltip": "If enabled, destroyable bushes will also be cleared.",
   "config.clear-fruit-trees.name": "Clear Fruit Trees",
   "config.clear-fruit-trees.tooltip": "If enabled, fruit trees will also be cleared.",
   "config.clear-tapped-trees.name": "Clear Tapped Trees",
@@ -24,6 +26,6 @@
   "config.drop-multiplier.name": "Drop Multiplier",
   "config.drop-multiplier.tooltip": "Multiplies the number of dropped items (wood, stone, fiber, etc).",
 
-  "command.clearfarm.summary": "Clears selected trees, stones, grass, and debris from the current location.",
+  "command.clearfarm.summary": "Clears selected trees, stones, bushes, grass, and debris from the current location.",
   "command.clearfarm.usage": "Usage: clearfarm"
 }
